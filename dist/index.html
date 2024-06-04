@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="assets/favicon-DHFuoNdw.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://tilemaps.icgc.cat/cdn/mapicgc-gl-js/mapicgc-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@2.0.1/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@2.0.1/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <title>Visor Territorial</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #map {
+            position: absolute;
+            top: 0px;
+            /* Ajustar segons l'alçada de la barra superior */
+            width: 100%;
+            height: 100%;
+            /* Ajustar segons l'alçada de la barra superior */
+        }
+
+        #topBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: rgba(31, 32, 32, 0.95);
+            z-index: 10000;
+            display: flex;
+            justify-content: space-between;
+            /* Alinea els elements als extrems */
+            align-items: center;
+            /* Centra verticalment el contingut */
+            color: white;
+            padding: 0 20px;
+        }
+
+        #title {
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-left: 40%;
+
+        }
+
+        #formContainer {
+            display: flex;
+            align-items: center;
+            margin-right: 7%;
+        }
+
+        #textSelector {
+            height: 20px;
+            width: 240px;
+            border-radius: 8px;
+            background-color: #1F2020;
+            color: white;
+            padding: 5px;
+            font-size: 1em;
+            border: 1px solid #555;
+            margin-right: -40px;
+            /* Espaiat entre l'input i el botó */
+        }
+
+        #textForm button {
+            height: 25px;
+            border-radius: 8px;
+            padding: 0 5px;
+            color: #f0f0f0;
+            font-size: 1em;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        input::placeholder {
+            color: white !important;
+        }
+
+        .base {
+            font-size: 1.2em;
+            margin-left: 45px;
+        }
+
+        #layers2 {
+            display: flex;
+            align-items: center;
+        }
+
+        #serveiSelector2 {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #565757;
+            border-radius: 5px;
+            background-color: #1F2020;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            color: #f0f0f0;
+            margin-left: 10px;
+            /* Espaiat entre el text i el select */
+        }
+
+        #serveiSelector2:hover {
+            border-color: #555;
+        }
+
+        #serveiSelector2:focus {
+            outline: none;
+            border-color: #4d90fe;
+            box-shadow: 0 0 5px rgba(77, 144, 254, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #333;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: #f3f3f3;
+        }
+
+        #infoPanel {
+            position: absolute;
+            left: -500px;
+            /* Assegura't que es desplaça fora de la vista */
+            top: 0;
+            width: 450px;
+            height: 100%;
+            background-color: rgba(31, 32, 32, 0.95);
+            color: white;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+        }
+
+        #infoPanel.open {
+            left: 0;
+        }
+
+        #infoPanelContent {
+            margin-top: 60px;
+        }
+
+        #closePanel {
+            position: absolute;
+            top: 20px;
+            left: 10px;
+            font-size: 36px;
+            color: white;
+            cursor: pointer;
+            display: none;
+        }
+
+        #infoPanel.open #closePanel {
+            display: block;
+        }
+
+        #openPanel {
+            position: absolute;
+            top: 20px;
+            left: 10px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 10001;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .maplibregl-control-container {
+            z-index: 10002;
+        }
+
+        .maplibregl-ctrl-top-right {
+            top: 70px;
+            right: 10px;
+        }
+
+        /* Spin loader */
+        .loader {
+            border: 5px solid #f3f3f3;
+            /* Light grey */
+            border-top: 5px solid #303030;
+            /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+            position: absolute;
+            top: 15%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+        }
+
+        .myButtonClass {
+            background-color: #293a29;
+            /* Verd */
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+
+        .myButtonClass:hover {
+            background-color: #45a049;
+            /* Verd més fosc al passar per sobre */
+            color: white;
+        }
+
+        .layer-properties {
+
+            margin-top: 10px;
+            margin-left: 10px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .highlighted-button {
+            background-color: #45a049;
+            border: 2px solid rgb(92, 53, 1);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script type="module" crossorigin src="assets/index-DlEL5neL.js"></script>
+</head>
+
+<body>
+    <div id="map">
+
+        <div id="topBar">
+            <div id="title">VISOR TERRITORIAL</div>
+            <div id="formContainer">
+                <form id="textForm" onsubmit="onTextFormSubmit(event)">
+                    <input type="text" id="textSelector" placeholder="Cerca una adreça..." />
+                    <button type="submit">🔍</button>
+                </form>
+                <div id="layers2">
+                    <div class="base">Base de referència:</div>
+                    <select id="serveiSelector2" onchange="onBaseChange()">
+                        <option selected value="fosc">Mapa fosc</option>
+                        <option value="orto">Ortofoto</option>
+                        <option value="topo">Topogràfic</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <div id="infoPanel">
+            <span id="closePanel" onclick="closePanel()">&times;</span>
+            <div id="loader" class="loader" style="display:none;"></div>
+            <div id="infoPanelContent">
+                Clica sobre el mapa per visualitzar informació d'un punt
+            </div>
+        </div>
+
+        <span id="openPanel" onclick="openPanel()">&#9776;</span>
+
+
+</body>
+
+</html>
