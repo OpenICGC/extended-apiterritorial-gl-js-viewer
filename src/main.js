@@ -15,13 +15,7 @@ function getBounds() {
   return bbox;
 }
 
-function onServeiChange() {
-  // Obtenir el valor seleccionat
-  const serveiSelector = document.getElementById("serveiSelector");
-  service = serveiSelector.value;
-}
-
-function onBaseChange() {
+async function onBaseChange() {
   const serveiSelector2 = document.getElementById("serveiSelector2");
   base = serveiSelector2.value;
 

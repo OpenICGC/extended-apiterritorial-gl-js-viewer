@@ -1,8 +1,8 @@
 export default {
-  root: './', 
-  srcDir: './src', 
+  root: './',
+  srcDir: './src',
   build: {
-    assetsDir: './assets',  
-    filenameHashing: false,  
+    assetsDir: './assets',
+    filenameHashing: false,
   }
 }
