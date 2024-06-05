@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="assets/favicon-DHFuoNdw.png" />
+    <link rel="icon" type="image/png" href="/assets/favicon-DHFuoNdw.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://tilemaps.icgc.cat/cdn/mapicgc-gl-js/mapicgc-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@2.0.1/dist/maplibre-gl.css" />
@@ -257,9 +257,41 @@
                 transform: rotate(360deg);
             }
         }
+
+        @media only screen and (max-width: 800px) {
+            #infoPanel {
+                position: fixed;
+                height: 45%;
+                width: 100% !important;
+
+
+            }
+
+            #title {
+                margin-left: 10% !important;
+                font-size: 1em;
+            }
+
+            #textForm {
+                display: none;
+            }
+
+            #layers2 {
+                left: 50%;
+
+            }
+
+            #serveiSelector2 {
+                width: 100% !important;
+            }
+
+            .base {
+                font-size: 1em;
+            }
+        }
     </style>
 
-    <script type="module" crossorigin src="assets/index-CRQUOndl.js"></script>
+  <script type="module" crossorigin src="/assets/index-CRQUOndl.js"></script>
 </head>
 
 <body>
@@ -291,8 +323,7 @@
             </div>
         </div>
 
-        <span id="openPanel" onclick="openPanel()">&#9776;</span>
-
+        <span id="openPanel" onclick="openPanel()">&#9776;</span>
 
 </body>
 
