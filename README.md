@@ -1,68 +1,48 @@
-## basic mapicgc-gl-js viewer
+## extended-apiterritorial-gl-js-viewer
 
-  * Basic mapicgc-gl-js viewer
+  * Maplibre-gl-js viewer including some API Territorial features
   * Vanilla JS + Vite
 
-### Mapicgc-gl-js documentation
+### API Territorial documentation
 
-  * https://openicgc.github.io/mapicgc-doc/
+  * https://github.com/OpenICGC/api-territorial-docs
 
 ### To install
 
 ```bash
-git clone https://github.com/OpenICGC/basic-mapicgc-gl-js-viewer-js.git
+git clone https://github.com/OpenICGC/extended-apiterritorial-gl-js-viewer.git
 
-cd /basic-mapicgc-gl-js-viewer-js
+cd /extended-apiterritorial-gl-js-viewer
 
 npm install
-npm run build
-npm run serve
+npm run dev - //development
+npm run build - //build 4 production
 
 ```
 
 
 
-### Javascript
+### API Connection (main.js)
 
 ```javascript
 
-import { Map, Config } from "mapicgc-gl-js";
-//import * as mapicgcgl from  "mapicgc-gl-js";
+let service = "all"; //you can choose specific services (comma separated)
 
-async function initMap() {
-  try {
-    const data = await Config.getConfigICGC();
-    const map = new Map({
-      container: "map",
-      style: data.Styles.LIGHT,
-      center: [1.808, 41.618],
-      zoom: 10,
-      maxZoom: 19,
-      hash: true,
-      pitch: 0,
-    });
-    map.on("load", () => {
-      //GEOCODER
-      map.addGeocoderICGC();
-      //CONTROLS
-      map.addGeolocateControl(
-        {
-          positionOptions: {
-            enableHighAccuracy: true,
-          },
-          trackUserLocation: true,
-        },
-        "bottom-right"
-      );
-      map.addExportControl({}, "top-right");
-      map.addFullscreenControl({}, "top-right");
-      map.addTerrainICGC(data.Terrains.ICGC5M, "bottom-right");
-    });
-  } catch (err) {
-    console.error(err);
-  }
+ map.on("click", function (e) {
+    let lon = e.lngLat.lng;
+    let lat = e.lngLat.lat;
+    apiConnect(lat, lon, service);
+ });
+
+async function apiConnect(lat, lon, service) {
+  
+  const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
+ 
+ const dades = await response.json();
+ 
+ //Do anything with dades (geojson)
+ 
+
 }
-
-initMap();
 
 ```
