@@ -239,7 +239,7 @@ async function geocoderRequest(text) {
   }
 }
 
-function init() {
+function initMap() {
   map = new maplibregl.Map({
     container: "map",
     style:
@@ -292,5 +292,24 @@ function closePanel() {
   infoPanel.style.width = "0px"; // Tancar el panell
   document.getElementById("openPanel").style.display = "block"; // Mostrar el botó d'obrir quan el panell està tancat
 }
+function init() {
+  initMap();
 
-init();
+  const serveiSelector2 = document.getElementById("serveiSelector2");
+  serveiSelector2.addEventListener('change', onBaseChange);
+
+  // Altres funcions d'inicialització aquí si n'hi ha
+  const openPanelButton = document.getElementById("openPanel");
+  openPanelButton.addEventListener('click', openPanel);
+  const closePanelButton = document.getElementById("closePanel");
+  closePanelButton.addEventListener('click', closePanel);
+
+  const textInput = document.getElementById("textSelector");
+  textInput.addEventListener('change', () => {
+    const searchText = textInput.value;
+    geocoderRequest(searchText);
+  });
+}
+
+// Executar la funció d'inicialització una vegada que tota la pàgina estigui carregada
+window.addEventListener('DOMContentLoaded', init);
