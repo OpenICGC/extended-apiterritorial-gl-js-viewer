@@ -115,8 +115,10 @@ function addGeometry(servei, button) {
         paint: {
           'fill-color': '#fee899',
           'fill-opacity': 0.8,
+
+
         }
-      });
+      }, "water-name-lakeline-z12");
 
       const geometry = copia[i].geometry;
 
@@ -153,9 +155,10 @@ function addGeometry(servei, button) {
       button.classList.add('highlighted-button');
     }
   }
-  setTimeout(function () {
-    map.fitBounds(bbox, { padding: 200 });
-  }, 0);
+
+  map.fitBounds(bbox, { padding: 150 });
+
+
 }
 function onTextFormSubmit(event) {
   event.preventDefault();
