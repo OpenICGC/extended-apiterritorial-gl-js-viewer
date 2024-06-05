@@ -153,7 +153,9 @@ function addGeometry(servei, button) {
       button.classList.add('highlighted-button');
     }
   }
-  map.fitBounds(bbox, { padding: 200 });
+  setTimeout(function () {
+    map.fitBounds(bbox, { padding: 200 });
+  }, 0);
 }
 function onTextFormSubmit(event) {
   event.preventDefault();
