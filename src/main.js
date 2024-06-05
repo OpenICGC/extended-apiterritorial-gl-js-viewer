@@ -294,14 +294,14 @@ function openPanel() {
   var infoPanel = document.getElementById("infoPanel");
   infoPanel.classList.add("open");
   infoPanel.style.width = "400px"; // Amplada del panell quan està obert
-  document.getElementById("openPanel").style.display = "none"; // Amagar el botó d'obrir quan el panell està obert
+  document.getElementById("openPanelBtn").style.display = "none"; // Amagar el botó d'obrir quan el panell està obert
 }
 
 function closePanel() {
   var infoPanel = document.getElementById("infoPanel");
   infoPanel.classList.remove("open");
   infoPanel.style.width = "0px"; // Tancar el panell
-  document.getElementById("openPanel").style.display = "block"; // Mostrar el botó d'obrir quan el panell està tancat
+  document.getElementById("openPanelBtn").style.display = "block"; // Mostrar el botó d'obrir quan el panell està tancat
 }
 function init() {
   initMap();
@@ -310,7 +310,7 @@ function init() {
   serveiSelector2.addEventListener('change', onBaseChange);
 
   // Altres funcions d'inicialització aquí si n'hi ha
-  const openPanelButton = document.getElementById("openPanel");
+  const openPanelButton = document.getElementById("openPanelBtn");
   openPanelButton.addEventListener('click', openPanel);
   const closePanelButton = document.getElementById("closePanel");
   closePanelButton.addEventListener('click', closePanel);
