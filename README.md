@@ -1,3 +1,6 @@
+![Visor territorial](image.png)
+
+
 ## extended-apiterritorial-gl-js-viewer
 
   * Maplibre-gl-js viewer including some API Territorial features
@@ -41,7 +44,6 @@ async function apiConnect(lat, lon, service) {
  const dades = await response.json();
  
  //Do anything with dades (geojson)
- 
 
 }
 
