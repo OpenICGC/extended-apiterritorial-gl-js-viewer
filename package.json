@@ -12,6 +12,6 @@
     "vite": "5.2.12"
   },
   "dependencies": {
-    "mapicgc-gl-js": "^0.0.76"
+    "mapicgc-gl-js": "^0.0.81"
   }
 }

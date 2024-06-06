@@ -261,12 +261,40 @@
 
         @media (max-width: 624px) {
             #infoPanel {
-                position: fixed;
-                height: 45%;
-                width: 100% !important;
-
-
+                position: absolute;
+                bottom: 0 !important;
+                left: -500;
+                width: 100%;
+                height: auto;
+                max-height: 50%;
+                /* o ajusta l'alçada desitjada */
+                top: 50%;
             }
+
+            #infoPanel.open {
+                left: 0 !important;
+            }
+
+            #topBar {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                width: 100%;
+                height: auto;
+            }
+
+            #openPanel {
+                top: 95%;
+            }
+
+            #infoPanelContent {
+                margin-top: 30px;
+                margin-bottom: 50px;
+            }
+
+            /* #closePanel {
+                top: 90%;
+            } */
 
             #title {
                 margin-left: 10% !important;
@@ -290,10 +318,14 @@
             #textForm {
                 display: none;
             }
+
+            .maplibregl-ctrl-top-right {
+                display: none;
+            }
         }
     </style>
 
-  <script type="module" crossorigin src="/assets/index-B2Pisj5J.js"></script>
+  <script type="module" crossorigin src="/assets/index-QrKCi65N.js"></script>
 </head>
 
 <body>

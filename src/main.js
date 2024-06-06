@@ -88,8 +88,6 @@ async function apiConnect(lat, lon, service) {
 }
 
 function addGeometry(servei, button) {
-  console.log('Afegim geometria per al servei:', servei);
-
   if (map.getLayer('clicked-layer')) {
     map.removeLayer('clicked-layer');
   }
