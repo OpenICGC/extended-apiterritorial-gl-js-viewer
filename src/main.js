@@ -291,7 +291,7 @@ function hideLoader() {
 function openPanel() {
   var infoPanel = document.getElementById("infoPanel");
   infoPanel.classList.add("open");
-  infoPanel.style.width = "400px"; // Amplada del panell quan està obert
+  infoPanel.style.width = "300px"; // Amplada del panell quan està obert
   document.getElementById("openPanel").style.display = "none"; // Amagar el botó d'obrir quan el panell està obert
 }
 
