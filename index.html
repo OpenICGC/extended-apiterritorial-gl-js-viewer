@@ -249,6 +249,36 @@
             border: 1px solid white;
         }
 
+        .notification {
+            position: absolute;
+            top: 75px;
+            right: 36%;
+            left: 36%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1.5em;
+            z-index: 10000;
+            display: none;
+            /* Comença ocult */
+        }
+
+        .notification .close-btn {
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+            float: right;
+            font-size: 1.2em;
+            line-height: 1em;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .notification .close-btn:hover {
+            color: red;
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -355,9 +385,31 @@
                 Clica sobre el mapa per visualitzar informació d'un punt
             </div>
         </div>
+        <div id="notification" class="notification">
+            Clica sobre el mapa per visualitzar informació d'un punt
+            <span class="close-btn" onclick="closeNotification()">&times;</span>
+        </div>
 
         <span id="openPanel" onclick="openPanel()">&#9776;</span>
         <script type="module" src="./src/main.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var notification = document.getElementById("notification");
+
+                // Mostra la notificació
+                notification.style.display = "block";
+
+                // Amaga la notificació després de 5 segons
+                setTimeout(function () {
+                    notification.style.display = "none";
+                }, 5000);
+            });
+
+            function closeNotification() {
+                var notification = document.getElementById("notification");
+                notification.style.display = "none";
+            }
+        </script>
 
 </body>
 
