@@ -3,6 +3,7 @@ var marker1;
 let service = "all";
 let base = "fosc";
 let copia;
+
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = 5;
 const largeScreenPadding = 150;
@@ -19,6 +20,7 @@ function getBounds() {
 }
 
 export async function onBaseChange() {
+  const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
   const serveiSelector2 = document.getElementById("serveiSelector2");
   const base = serveiSelector2.value;
 
@@ -65,7 +67,7 @@ export async function onBaseChange() {
             'fill-color': '#fee899',
             'fill-opacity': 0.7,
           }
-        }, "water-name-lakeline-z12");
+        }, layerSymbol);
       }
     }
   });
@@ -90,6 +92,7 @@ async function apiConnect(lat, lon, service) {
   let serveisDisponibles = [];
   let address = null;
   let elevation = null;
+
 
   if (dades[0].features.length < 4) {
     document.getElementById("infoPanelContent").innerHTML = "No hi ha dades sobre el punt seleccionat.";
@@ -130,6 +133,7 @@ async function apiConnect(lat, lon, service) {
 }
 
 function addGeometry(servei, button) {
+  const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
   if (map.getLayer('clicked-layer')) {
     map.removeLayer('clicked-layer');
   }
@@ -161,7 +165,7 @@ function addGeometry(servei, button) {
 
 
         }
-      }, "water-name-lakeline-z12");
+      }, layerSymbol);
 
       const geometry = copia[i].geometry;
 
@@ -217,7 +221,17 @@ export async function onTextFormSubmit(event) {
   textInput.value = "";
 }
 
-async function geocoderRequest(text) {
+export function getFirstSymbolLayerId(layers) {
+  let layer = "background";
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].type == "symbol" && layers[i]["source-layer"] !== "contour") {
+      layer = layers[i].id;
+      return layer;
+    }
+  }
+}
+
+export async function geocoderRequest(text) {
   const response = await fetch(
     `https://api.icgc.cat/territori/adress/${text}`
   );
