@@ -5,7 +5,7 @@ let base = "fosc";
 let copia;
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
-const smallScreenPadding = 5;
+const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
 const largeScreenPadding = 150;
 
 function getBounds() {
@@ -235,6 +235,7 @@ function addGeometry(servei, button) {
 
   const screenWidth = window.innerWidth;
   const padding = screenWidth < 750 ? smallScreenPadding : largeScreenPadding;
+
 
   map.fitBounds(bbox, { padding: padding });
 
