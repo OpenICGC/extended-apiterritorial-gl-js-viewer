@@ -67,6 +67,7 @@ async function apiConnect(lat, lon, service) {
       contentHtml.innerHTML += `<b>Adreça: </b> ${address.etiqueta} <br>`;
     }
     if (elevation) {
+      contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(4)}, ${lon.toFixed(4)} <br>`
       contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br><br>`
     }
     for (let j = 0; j < serveisDisponibles.length; j++) {
@@ -115,7 +116,7 @@ function addGeometry(servei, button) {
         layout: {},
         paint: {
           'fill-color': '#fee899',
-          'fill-opacity': 0.8,
+          'fill-opacity': 0.7,
 
 
         }
