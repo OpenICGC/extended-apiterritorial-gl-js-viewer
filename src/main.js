@@ -152,6 +152,10 @@ function addGeometry(servei, button) {
   if (map.getSource('clicked-layer')) {
     map.removeSource('clicked-layer');
   }
+  const previousCloseButton = document.querySelector('.closeButtonClass');
+  if (previousCloseButton) {
+    previousCloseButton.parentNode.removeChild(previousCloseButton);
+  }
 
   let bbox = new maplibregl.LngLatBounds();
 
