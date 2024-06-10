@@ -99,7 +99,8 @@ async function apiConnect(lat, lon, service) {
       if (dades[0].features[i].id === 'Geocodificador') {
         address = dades[0].features[i].properties;
       } else if (dades[0].features[i].id === 'Elevació') {
-        elevation = dades[0].features[i].value;
+        console.log('ev', dades[0].features[i])
+        elevation = dades[0].features[i].properties.value;
       }
     }
 
