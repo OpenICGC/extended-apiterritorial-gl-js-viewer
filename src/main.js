@@ -74,6 +74,16 @@ export async function onBaseChange() {
   });
 }
 
+// Funció per eliminar la geometria del mapa
+function removeGeometry() {
+  if (map.getLayer('clicked-layer')) {
+    map.removeLayer('clicked-layer');
+  }
+  if (map.getSource('clicked-layer')) {
+    map.removeSource('clicked-layer');
+  }
+}
+
 
 async function apiConnect(lat, lon, service) {
   if (map.getLayer('clicked-layer')) {
@@ -128,6 +138,7 @@ async function apiConnect(lat, lon, service) {
         contentHtml.appendChild(document.createElement('br'));
       }
     }
+
   }
 
   hideLoader();
@@ -193,13 +204,28 @@ function addGeometry(servei, button) {
         propertyLine.textContent = `${key}: ${value}`;
         propertiesDiv.appendChild(propertyLine);
       }
+      // Dins la funció addGeometry
+      const closeButton = document.createElement('button');
+
+      closeButton.textContent = '×'; // Caràcter 'x' per representar tancar
+      closeButton.classList.add('closeButtonClass');
+      closeButton.addEventListener('click', () => {
+        removeGeometry();
+        propertiesDiv.remove(); // Elimina les propietats
+        closeButton.remove(); // Elimina el botó de tancar
+      });
+      propertiesDiv.appendChild(closeButton);
+
 
       button.parentNode.insertBefore(propertiesDiv, button.nextSibling);
+      button.parentNode.insertBefore(closeButton, button.nextSibling);
 
       // Ressaltar el botó clicat
       const allButtons = document.querySelectorAll('.myButtonClass');
       allButtons.forEach(btn => btn.classList.remove('highlighted-button'));
       button.classList.add('highlighted-button');
+
+
     }
   }
 
