@@ -150,13 +150,23 @@ async function init() {
     map.on("click", function (e) {
       let lon = e.lngLat.lng;
       let lat = e.lngLat.lat;
+
       apiConnect(lat, lon, service);
+
       if (!marker1) {
-        marker1 = map.addMarker({ color: "#FF6E42", coord: [lon, lat] });
+        marker1 = map.addMarker({
+          coord: [lon, lat], options: {
+            color: "#FF6E42"
+          }
+        });
 
       } else {
         marker1.remove();
-        marker1 = map.addMarker({ color: "#FF6E42", coord: [lon, lat] });
+        marker1 = map.addMarker({
+          coord: [lon, lat], options: {
+            color: "#FF6E42"
+          }
+        });
         ;
       }
     });
@@ -224,7 +234,7 @@ async function init() {
         map.removeSource('clicked-layer');
       }
 
-      let bbox = new maplibregl.LngLatBounds();
+      let bbox = new LngLatBounds();
 
       for (let i = 0; i < copia.length; i++) {
         if (servei === copia[i].id) {

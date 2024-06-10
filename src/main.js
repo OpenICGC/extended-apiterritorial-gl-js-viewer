@@ -18,19 +18,59 @@ function getBounds() {
   return bbox;
 }
 
-async function onBaseChange() {
+export async function onBaseChange() {
   const serveiSelector2 = document.getElementById("serveiSelector2");
-  base = serveiSelector2.value;
+  const base = serveiSelector2.value;
 
-  if (base === 'orto') {
-    map.setStyle("https://geoserveis.icgc.cat/contextmaps/icgc_orto_estandard.json");
-
-  } else if (base === 'topo') {
-    map.setStyle("https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json");
-  } else if (base === 'fosc') {
-    map.setStyle("https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json");
+  // Guardar les dades de la capa 'clicked-layer' si existeix
+  let clickedLayerData = null;
+  if (map.getLayer('clicked-layer')) {
+    const source = map.getSource('clicked-layer');
+    if (source && source._data) {
+      clickedLayerData = source._data;
+    }
   }
+
+  let styleUrl;
+  if (base === 'orto') {
+    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_orto_estandard.json";
+  } else if (base === 'topo') {
+    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json";
+  } else if (base === 'fosc') {
+    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json";
+  }
+
+  // Canviar l'estil del mapa
+  map.setStyle(styleUrl);
+
+  // Esperar a que el nou estil es carregui completament
+  map.once('styledata', () => {
+    if (clickedLayerData) {
+      // Afegeix la font amb les dades guardades
+      if (!map.getSource('clicked-layer')) {
+        map.addSource('clicked-layer', {
+          type: 'geojson',
+          data: clickedLayerData
+        });
+      }
+
+      // Afegeix la capa 'clicked-layer'
+      if (!map.getLayer('clicked-layer')) {
+        map.addLayer({
+          id: 'clicked-layer',
+          type: 'fill',
+          source: 'clicked-layer',
+          layout: {},
+          paint: {
+            'fill-color': '#fee899',
+            'fill-opacity': 0.7,
+          }
+        }, "water-name-lakeline-z12");
+      }
+    }
+  });
 }
+
 
 async function apiConnect(lat, lon, service) {
   if (map.getLayer('clicked-layer')) {
@@ -165,7 +205,7 @@ function addGeometry(servei, button) {
 
 
 }
-function onTextFormSubmit(event) {
+export async function onTextFormSubmit(event) {
   event.preventDefault();
   if (map.getLayer("punts2")) {
     map.removeLayer("punts2").removeSource("punts2");
@@ -289,30 +329,30 @@ function hideLoader() {
   document.getElementById("infoPanelContent").style.display = "block";
 }
 
-function openPanel() {
+export function openPanel() {
   var infoPanel = document.getElementById("infoPanel");
   infoPanel.classList.add("open");
   infoPanel.style.width = "300px"; // Amplada del panell quan està obert
   document.getElementById("openPanel").style.display = "none"; // Amagar el botó d'obrir quan el panell està obert
 }
 
-function closePanel() {
+export function closePanel() {
   var infoPanel = document.getElementById("infoPanel");
   infoPanel.classList.remove("open");
   infoPanel.style.width = "0px"; // Tancar el panell
   document.getElementById("openPanel").style.display = "block"; // Mostrar el botó d'obrir quan el panell està tancat
 }
-function init() {
+export function init() {
   initMap();
 
-  const serveiSelector2 = document.getElementById("serveiSelector2");
-  serveiSelector2.addEventListener('change', onBaseChange);
-
-  // Altres funcions d'inicialització aquí si n'hi ha
-  const openPanelButton = document.getElementById("openPanel");
-  openPanelButton.addEventListener('click', openPanel);
-  const closePanelButton = document.getElementById("closePanel");
-  closePanelButton.addEventListener('click', closePanel);
+  /*   const serveiSelector2 = document.getElementById("serveiSelector2");
+    serveiSelector2.addEventListener('change', onBaseChange);
+  
+    // Altres funcions d'inicialització aquí si n'hi ha
+    const openPanelButton = document.getElementById("openPanel");
+    openPanelButton.addEventListener('click', openPanel);
+    const closePanelButton = document.getElementById("closePanel");
+    closePanelButton.addEventListener('click', closePanel); */
 
   const textInput = document.getElementById("textSelector");
   textInput.addEventListener('change', () => {
