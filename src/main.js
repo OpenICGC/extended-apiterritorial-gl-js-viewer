@@ -64,9 +64,10 @@ export async function onBaseChange() {
           source: 'clicked-layer',
           layout: {},
           paint: {
-            'fill-color': '#fee899',
-            'fill-opacity': 0.7,
-          }
+            "fill-color": "#f9f91d",
+            "fill-outline-color": "#f9f91d",
+            "fill-opacity": 0.5,
+          },
         }, layerSymbol);
       }
     }
@@ -160,11 +161,10 @@ function addGeometry(servei, button) {
         source: 'clicked-layer',
         layout: {},
         paint: {
-          'fill-color': '#fee899',
-          'fill-opacity': 0.7,
-
-
-        }
+          "fill-color": "#f9f91d",
+          "fill-outline-color": "#f9f91d",
+          "fill-opacity": 0.5,
+        },
       }, layerSymbol);
 
       const geometry = copia[i].geometry;
@@ -236,6 +236,7 @@ export async function geocoderRequest(text) {
     `https://api.icgc.cat/territori/adress/${text}`
   );
   const dades = await response.json();
+  console.log('dades', dades)
   if (dades.features) {
     if (!map.getLayer("punts2")) {
       map.addSource("punts2", {
@@ -292,9 +293,9 @@ export async function geocoderRequest(text) {
       map.getCanvas().style.cursor = "pointer";
       popup.setLngLat(e.features[0].geometry.coordinates).setHTML(
         `Adreça: <b>${e.features[0].properties.etiqueta}</b><br>
-      Carrer: <b>${e.features[0].properties.street}</b><br>
-      Municipi: <b>${e.features[0].properties.mun}</b><br>
-      Codi Postal: <b>${e.features[0].properties.postalcode}</b><br>`
+      Carrer: <b>${e.features[0].properties.nom}</b><br>
+      Municipi: <b>${e.features[0].properties.municipi}</b><br>
+      Codi Postal: <b>${e.features[0].properties.codi_postal}</b><br>`
       ).addTo(map);
     });
     map.on("mouseleave", "punts2", function (e) {
