@@ -6,8 +6,8 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://tilemaps.icgc.cat/cdn/mapicgc-gl-js/mapicgc-gl.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.3.2/dist/maplibre-gl.css" />
-    <script src="https://unpkg.com/maplibre-gl@4.3.2/dist/maplibre-gl.js"></script>
+    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" />
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -53,7 +53,7 @@
         #title {
             font-weight: bold;
             font-size: 1.5em;
-            margin-left: 5%;
+            margin-left: 42%;
 
         }
 
@@ -91,7 +91,7 @@
         }
 
         .base {
-            font-size: 1.2em;
+            font-size: 1.1em;
             margin-left: 45px;
         }
 
@@ -112,6 +112,7 @@
             -moz-appearance: none;
             color: #f0f0f0;
             margin-left: 10px;
+            height: 35px;
             /* Espaiat entre el text i el select */
         }
 
@@ -121,8 +122,8 @@
 
         #serveiSelector2:focus {
             outline: none;
-            border-color: #4d90fe;
-            box-shadow: 0 0 5px rgba(77, 144, 254, 0.5);
+            border-color: #a14529;
+            box-shadow: 0 0 5px #a14529;
         }
 
         ::-webkit-scrollbar {
@@ -147,7 +148,7 @@
             background-color: rgba(31, 32, 32, 0.95);
             color: white;
             overflow-x: hidden;
-            transition: 0.5s;
+            transition: 0.8s;
             padding: 20px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
             z-index: 10000;
@@ -173,6 +174,10 @@
             display: none;
         }
 
+        #closePanel:hover {
+            color: #a14529;
+        }
+
         #infoPanel.open #closePanel {
             display: block;
         }
@@ -185,6 +190,10 @@
             color: white;
             cursor: pointer;
             z-index: 10001;
+        }
+
+        #openPanel:hover {
+            color: #a14529;
         }
 
         a {
@@ -204,7 +213,7 @@
         .loader {
             border: 5px solid #f3f3f3;
             /* Light grey */
-            border-top: 5px solid #303030;
+            border-top: 5px solid #32522ec9;
             /* Blue */
             border-radius: 50%;
             width: 50px;
@@ -212,7 +221,7 @@
             animation: spin 1s linear infinite;
             margin: auto;
             position: absolute;
-            top: 15%;
+            top: 10%;
             left: 40%;
             transform: translate(-50%, -50%);
         }
@@ -223,6 +232,7 @@
             border: none;
             color: white;
             padding: 6px 10px;
+            border-radius: 6px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -261,8 +271,14 @@
             border-radius: 5px;
             font-size: 1.5em;
             z-index: 10000;
-            display: none;
-            /* Comença ocult */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            /* Afegir transició de 1 segon */
+        }
+
+        .notification.show {
+            opacity: 1;
+            /* Mostra la notificació */
         }
 
         .notification .close-btn {
@@ -277,7 +293,7 @@
         }
 
         .notification .close-btn:hover {
-            color: red;
+            color: #a14529;
         }
 
         /* Afegim aquest estil al teu fitxer CSS o directament a l'stylesheet de la pàgina */
@@ -293,8 +309,12 @@
         }
 
         .closeButtonClass:hover {
-            color: red;
+            color: #a14529;
             /* Canviem el color quan es passa el ratolí per sobre (opcional) */
+        }
+
+        .cerca {
+            border: none;
         }
 
         @keyframes spin {
@@ -389,7 +409,7 @@
             <div id="formContainer">
                 <form id="textForm" onsubmit="onTextFormSubmit(event)">
                     <input type="text" id="textSelector" placeholder="Cerca una adreça..." />
-                    <button type="submit">🔍</button>
+                    <button class="cerca" type="submit">🔍</button>
                 </form>
                 <div id="layers2">
                     <div class="base">Base de referència:</div>
@@ -417,10 +437,8 @@
         <span id="openPanel" onclick="openPanel()">&#9776;</span>
         <script type="module">
             import { init, onBaseChange, openPanel, closePanel } from './src/main.js';
-
             window.closePanel = closePanel;
             window.openPanel = openPanel;
-            //window.addEventListener('DOMContentLoaded', init);
             window.onBaseChange = onBaseChange; // Assignar la funció al window per fer-la accessible globalment
         </script>
         <script>
@@ -428,17 +446,17 @@
                 var notification = document.getElementById("notification");
 
                 // Mostra la notificació
-                notification.style.display = "block";
+                notification.classList.add("show");
 
-                // Amaga la notificació després de 5 segons
+                // Amaga la notificació després de 10 segons
                 setTimeout(function () {
-                    notification.style.display = "none";
+                    notification.classList.remove("show");
                 }, 10000);
             });
 
             function closeNotification() {
                 var notification = document.getElementById("notification");
-                notification.style.display = "none";
+                notification.classList.remove("show");
             }
         </script>
 

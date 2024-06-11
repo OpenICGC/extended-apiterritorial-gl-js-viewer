@@ -45,6 +45,8 @@ export async function onBaseChange() {
   // Canviar l'estil del mapa
   map.setStyle(styleUrl);
 
+
+
   // Esperar a que el nou estil es carregui completament
   map.once('styledata', () => {
     if (clickedLayerData) {
@@ -70,8 +72,36 @@ export async function onBaseChange() {
           },
         }, layerSymbol);
       }
+
     }
+    addSources().then(function () {
+      addTerrain();
+    });
   });
+}
+
+async function addSources() {
+  if (!map.getSource("terrainMapZen")) {
+    map.addSource("terrainMapZen", {
+      type: "raster-dem",
+      url: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+      tileSize: 512,
+      maxzoom: 14,
+    });
+  }
+}
+
+function addTerrain() {
+
+  try {
+    map.setTerrain({
+      source: "terrainMapZen",
+      exaggeration: 1.5,
+    });
+  } catch (err) {
+    console.log("ERROR addTerrain");
+    console.log(err);
+  }
 }
 
 // Funció per eliminar la geometria del mapa
@@ -343,27 +373,42 @@ function initMap() {
       "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json",
     center: [2.0042, 41.7747],
     zoom: 7,
+    maxZoom: 18,
     attributionControl: false,
     hash: false,
   });
-  map.addControl(new maplibregl.NavigationControl(), 'top-right');
-  var fullscreenControl = new maplibregl.FullscreenControl();
-  map.addControl(fullscreenControl, 'top-right');
-  map.on("click", function (e) {
-    let lon = e.lngLat.lng;
-    let lat = e.lngLat.lat;
-    apiConnect(lat, lon, service);
-    if (!marker1) {
-      marker1 = new maplibregl.Marker({ color: "#FF6E42" })
-        .setLngLat([lon, lat])
-        .addTo(map);
-    } else {
-      marker1.remove();
-      marker1 = new maplibregl.Marker({ color: "#FF6E42" })
-        .setLngLat([lon, lat])
-        .addTo(map);
-    }
-  });
+  map.on('load', function () {
+    addSources().then(function () {
+      addTerrain();
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    var fullscreenControl = new maplibregl.FullscreenControl();
+    map.addControl(fullscreenControl, 'top-right');
+    map.addControl(new maplibregl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: false
+    }), 'top-right');
+    map.on("click", function (e) {
+      let lon = e.lngLat.lng;
+      let lat = e.lngLat.lat;
+      apiConnect(lat, lon, service);
+      if (!marker1) {
+        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
+          .setLngLat([lon, lat])
+          .addTo(map);
+      } else {
+        marker1.remove();
+        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
+          .setLngLat([lon, lat])
+          .addTo(map);
+      }
+    });
+
+  })
+
 }
 
 function showLoader() {
