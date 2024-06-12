@@ -1,23 +1,11 @@
 var map;
 var marker1;
 let service = "all";
-let base = "fosc";
 let copia;
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
 const largeScreenPadding = 150;
-
-function getBounds() {
-  const bounds = map.getBounds();
-  var bbox = {
-    minX: bounds.getWest(),
-    minY: bounds.getSouth(),
-    maxX: bounds.getEast(),
-    maxY: bounds.getNorth(),
-  };
-  return bbox;
-}
 
 export async function onBaseChange() {
   const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
@@ -44,8 +32,6 @@ export async function onBaseChange() {
 
   // Canviar l'estil del mapa
   map.setStyle(styleUrl);
-
-
 
   // Esperar a que el nou estil es carregui completament
   map.once('styledata', () => {
@@ -92,7 +78,6 @@ async function addSources() {
 }
 
 function addTerrain() {
-
   try {
     map.setTerrain({
       source: "terrainMapZen",
@@ -114,7 +99,67 @@ function removeGeometry() {
   }
 }
 
+function highlightGeometry(servei) {
+  const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
+  if (map.getLayer('hovered-layer')) {
+    map.removeLayer('hovered-layer');
+  }
+  if (map.getSource('hovered-layer')) {
+    map.removeSource('hovered-layer');
+  }
 
+  let bbox = new maplibregl.LngLatBounds();
+
+  for (let i = 0; i < copia.length; i++) {
+    if (servei === copia[i].id) {
+      map.addSource('hovered-layer', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: copia[i].geometry,
+          properties: {}
+        }
+      });
+
+      map.addLayer({
+        id: 'hovered-layer',
+        type: 'fill',
+        source: 'hovered-layer',
+        layout: {},
+        paint: {
+          "fill-color": "white",
+          "fill-opacity": 0.4,
+
+        },
+      }, layerSymbol);
+
+      const geometry = copia[i].geometry;
+
+      if (geometry.type === 'Polygon') {
+        geometry.coordinates[0].forEach(coordinatePair => {
+          bbox.extend(coordinatePair);
+        });
+      } else if (geometry.type === 'MultiPolygon') {
+        geometry.coordinates.forEach(polygon => {
+          polygon[0].forEach(coordinatePair => {
+            bbox.extend(coordinatePair);
+          });
+        });
+      }
+    }
+  }
+}
+
+function removeHighlightedGeometry() {
+  if (map.getLayer('hovered-layer')) {
+    map.removeLayer('hovered-layer');
+  }
+  if (map.getSource('hovered-layer')) {
+    map.removeSource('hovered-layer');
+  }
+}
+
+// Modifica la funció apiConnect per afegir els esdeveniments mouseover i mouseout
 async function apiConnect(lat, lon, service) {
   if (map.getLayer('clicked-layer')) {
     map.removeLayer('clicked-layer');
@@ -134,7 +179,6 @@ async function apiConnect(lat, lon, service) {
   let address = null;
   let elevation = null;
 
-
   if (dades[0].features.length < 4) {
     document.getElementById("infoPanelContent").innerHTML = "No hi ha dades sobre el punt seleccionat.";
   } else {
@@ -143,11 +187,9 @@ async function apiConnect(lat, lon, service) {
       if (dades[0].features[i].id === 'Geocodificador') {
         address = dades[0].features[i].properties;
       } else if (dades[0].features[i].id === 'Elevació') {
-
         elevation = dades[0].features[i].properties.value;
       }
     }
-
     if (address) {
       contentHtml.innerHTML += `<b>Adreça: </b> ${address.etiqueta} <br>`;
     }
@@ -164,13 +206,17 @@ async function apiConnect(lat, lon, service) {
         button.addEventListener('click', () => {
           addGeometry(servei, button)
         });
+        button.addEventListener('mouseover', () => {
+          highlightGeometry(servei);
+        });
+        button.addEventListener('mouseout', () => {
+          removeHighlightedGeometry();
+        });
         contentHtml.appendChild(button);
         contentHtml.appendChild(document.createElement('br'));
       }
     }
-
   }
-
   hideLoader();
 }
 
@@ -228,7 +274,6 @@ function addGeometry(servei, button) {
 
       const previousProperties = document.querySelectorAll('.layer-properties');
       previousProperties.forEach(element => element.remove());
-
       const propertiesDiv = document.createElement('div');
       propertiesDiv.classList.add('layer-properties');
 
@@ -240,17 +285,17 @@ function addGeometry(servei, button) {
       }
       // Dins la funció addGeometry
       const closeButton = document.createElement('button');
-
       closeButton.textContent = '×'; // Caràcter 'x' per representar tancar
       closeButton.classList.add('closeButtonClass');
       closeButton.addEventListener('click', () => {
         removeGeometry();
         propertiesDiv.remove(); // Elimina les propietats
         closeButton.remove(); // Elimina el botó de tancar
+
+        // Treure la selecció del botó
+        button.classList.remove('highlighted-button');
       });
       propertiesDiv.appendChild(closeButton);
-
-
       button.parentNode.insertBefore(propertiesDiv, button.nextSibling);
       button.parentNode.insertBefore(closeButton, button.nextSibling);
 
@@ -258,18 +303,13 @@ function addGeometry(servei, button) {
       const allButtons = document.querySelectorAll('.myButtonClass');
       allButtons.forEach(btn => btn.classList.remove('highlighted-button'));
       button.classList.add('highlighted-button');
-
-
     }
   }
 
   const screenWidth = window.innerWidth;
   const padding = screenWidth < 750 ? smallScreenPadding : largeScreenPadding;
 
-
   map.fitBounds(bbox, { padding: padding });
-
-
 }
 export async function onTextFormSubmit(event) {
   event.preventDefault();
@@ -392,6 +432,10 @@ function initMap() {
       trackUserLocation: false
     }), 'top-right');
     map.on("click", function (e) {
+      var notification = document.getElementById("notification");
+      if (notification) {
+        notification.classList.remove("show");
+      }
       let lon = e.lngLat.lng;
       let lat = e.lngLat.lat;
       apiConnect(lat, lon, service);
@@ -406,9 +450,7 @@ function initMap() {
           .addTo(map);
       }
     });
-
   })
-
 }
 
 function showLoader() {
@@ -436,15 +478,6 @@ export function closePanel() {
 }
 export function init() {
   initMap();
-
-  /*   const serveiSelector2 = document.getElementById("serveiSelector2");
-    serveiSelector2.addEventListener('change', onBaseChange);
-  
-    // Altres funcions d'inicialització aquí si n'hi ha
-    const openPanelButton = document.getElementById("openPanel");
-    openPanelButton.addEventListener('click', openPanel);
-    const closePanelButton = document.getElementById("closePanel");
-    closePanelButton.addEventListener('click', closePanel); */
 
   const textInput = document.getElementById("textSelector");
   textInput.addEventListener('change', () => {
