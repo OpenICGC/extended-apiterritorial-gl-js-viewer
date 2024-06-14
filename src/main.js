@@ -326,7 +326,7 @@ function initMap() {
   map = new maplibregl.Map({
     container: "map",
     style:
-      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json",
+      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json",
     center: [2.0042, 41.7747],
     zoom: 7,
     maxZoom: 18,
