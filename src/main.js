@@ -1,7 +1,9 @@
+
 var map;
 var marker1;
 let service = "all";
 let copia;
+let selectedService = null; // Definim selectedService globalment
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
@@ -161,12 +163,6 @@ function removeHighlightedGeometry() {
 
 // Modifica la funció apiConnect per afegir els esdeveniments mouseover i mouseout
 async function apiConnect(lat, lon, service) {
-  if (map.getLayer('clicked-layer')) {
-    map.removeLayer('clicked-layer');
-  }
-  if (map.getSource('clicked-layer')) {
-    map.removeSource('clicked-layer');
-  }
   openPanel();
   showLoader();
   const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
@@ -204,7 +200,8 @@ async function apiConnect(lat, lon, service) {
         button.textContent = servei;
         button.classList.add('myButtonClass');
         button.addEventListener('click', () => {
-          addGeometry(servei, button)
+          selectedService = servei; // Emmagatzemem el servei seleccionat
+          addGeometry(servei, button);
         });
         button.addEventListener('mouseover', () => {
           highlightGeometry(servei);
@@ -216,18 +213,32 @@ async function apiConnect(lat, lon, service) {
         contentHtml.appendChild(document.createElement('br'));
       }
     }
+
+    // Seleccionem el primer servei per defecte només si tenim serveis disponibles
+    if (serveisDisponibles.length > 0 && !selectedService) {
+      setTimeout(() => {
+        selectedService = serveisDisponibles[0];
+        addGeometry(selectedService, contentHtml.querySelector('.myButtonClass'));
+      }, 0);
+    } else if (selectedService) {
+      // Selecciona tots els elements amb la classe .myButtonClass
+      let elements = document.querySelectorAll('.myButtonClass');
+
+      // Recorre cada element i comprova si conté el text seleccionat
+      elements.forEach(element => {
+        if (element.textContent.includes(selectedService)) {
+          // Si el text coincideix, crida la funció addGeometry amb aquest element
+          addGeometry(selectedService, element);
+        }
+      });
+    }
   }
   hideLoader();
 }
 
 function addGeometry(servei, button) {
   const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
-  if (map.getLayer('clicked-layer')) {
-    map.removeLayer('clicked-layer');
-  }
-  if (map.getSource('clicked-layer')) {
-    map.removeSource('clicked-layer');
-  }
+  removeGeometry(); // Elimina la geometria anterior abans d'afegir la nova
   const previousCloseButton = document.querySelector('.closeButtonClass');
   if (previousCloseButton) {
     previousCloseButton.parentNode.removeChild(previousCloseButton);
@@ -283,7 +294,6 @@ function addGeometry(servei, button) {
         propertyLine.textContent = `${key}: ${value}`;
         propertiesDiv.appendChild(propertyLine);
       }
-      // Dins la funció addGeometry
       const closeButton = document.createElement('button');
       closeButton.textContent = '×'; // Caràcter 'x' per representar tancar
       closeButton.classList.add('closeButtonClass');
@@ -311,6 +321,58 @@ function addGeometry(servei, button) {
 
   map.fitBounds(bbox, { padding: padding });
 }
+
+function initMap() {
+  map = new maplibregl.Map({
+    container: "map",
+    style:
+      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json",
+    center: [2.0042, 41.7747],
+    zoom: 7,
+    maxZoom: 18,
+    attributionControl: false,
+    hash: false,
+  });
+  map.on('load', function () {
+    addSources().then(function () {
+      addTerrain();
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    var fullscreenControl = new maplibregl.FullscreenControl();
+    map.addControl(fullscreenControl, 'top-right');
+    map.addControl(new maplibregl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: false
+    }), 'top-right');
+    map.on("click", function (e) {
+      var notification = document.getElementById("notification");
+      if (notification) {
+        notification.classList.remove("show");
+      }
+      let lon = e.lngLat.lng;
+      let lat = e.lngLat.lat;
+      if (selectedService) {
+        removeGeometry(); // Elimina la geometria abans de cridar a apiConnect
+        apiConnect(lat, lon, service).then(() => {
+          addGeometry(selectedService, document.querySelector(`.myButtonClass.highlighted-button`));
+        });
+      } else {
+        apiConnect(lat, lon, service);
+      }
+      if (!marker1) {
+        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
+          .setLngLat([lon, lat])
+          .addTo(map);
+      } else {
+        marker1.setLngLat([lon, lat]);
+      }
+    });
+  });
+}
+
 export async function onTextFormSubmit(event) {
   event.preventDefault();
   if (map.getLayer("punts2")) {
@@ -406,52 +468,6 @@ export async function geocoderRequest(text) {
   }
 }
 
-function initMap() {
-  map = new maplibregl.Map({
-    container: "map",
-    style:
-      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json",
-    center: [2.0042, 41.7747],
-    zoom: 7,
-    maxZoom: 18,
-    attributionControl: false,
-    hash: false,
-  });
-  map.on('load', function () {
-    addSources().then(function () {
-      addTerrain();
-    });
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
-
-    var fullscreenControl = new maplibregl.FullscreenControl();
-    map.addControl(fullscreenControl, 'top-right');
-    map.addControl(new maplibregl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true
-      },
-      trackUserLocation: false
-    }), 'top-right');
-    map.on("click", function (e) {
-      var notification = document.getElementById("notification");
-      if (notification) {
-        notification.classList.remove("show");
-      }
-      let lon = e.lngLat.lng;
-      let lat = e.lngLat.lat;
-      apiConnect(lat, lon, service);
-      if (!marker1) {
-        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
-          .setLngLat([lon, lat])
-          .addTo(map);
-      } else {
-        marker1.remove();
-        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
-          .setLngLat([lon, lat])
-          .addTo(map);
-      }
-    });
-  })
-}
 
 function showLoader() {
   document.getElementById("loader").style.display = "block";
