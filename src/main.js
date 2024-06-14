@@ -7,7 +7,7 @@ let selectedService = null; // Definim selectedService globalment
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
-const largeScreenPadding = 150;
+const largeScreenPadding = { top: 100, bottom: 100, left: 300, right: 50 };
 
 export async function onBaseChange() {
   const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
