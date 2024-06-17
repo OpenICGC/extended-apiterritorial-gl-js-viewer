@@ -266,7 +266,7 @@
             top: 75px;
             right: 36%;
             left: 36%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: #1f2020de;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -318,6 +318,111 @@
             border: none;
         }
 
+        #layerConfig {
+            background-color: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 25px;
+        }
+
+        #layerConfig:hover {
+            color: #a14529;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: #2a2a2ae3;
+            background-color: rgba(0, 0, 0, 0.747);
+            overflow: hidden;
+        }
+
+        .modal-content {
+            background-color: #1f2020e5;
+            color: white;
+            margin: 15% auto;
+            padding: 20px;
+            width: 40%;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #a14529;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Estils per al botó de control personalitzat */
+        .maplibregl-ctrl.pitch-control {
+            background-color: white;
+            padding: 7px;
+            cursor: pointer;
+            border: 1px solid rgb(207, 207, 207);
+            font-size: 12px;
+            border-radius: 4px;
+
+        }
+
+        .maplibregl-ctrl.pitch-control:hover {
+            background-color: #f0f0f0;
+        }
+
+        #configListContainer {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Estils personalitzats per als checkboxes */
+        .config-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #a14529;
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .config-item input[type="checkbox"]:checked {
+            background-color: #a14529;
+        }
+
+        .config-item input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 0px;
+            left: 4px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -348,7 +453,6 @@
                 height: auto;
                 left: -550px;
                 max-height: 50%;
-                /* o ajusta l'alçada desitjada */
                 top: 50%;
             }
 
@@ -362,6 +466,7 @@
                 bottom: 0;
                 width: 100%;
                 height: 60px;
+                z-index: 10001;
             }
 
             #openPanel {
@@ -373,19 +478,22 @@
                 margin-bottom: 50px;
             }
 
-            /* #closePanel {
-                top: 90%;
-            } */
+            .modal-content {
+                width: 80%;
+                top: 2%;
+            }
+
+            .modal {
+                z-index: 10000;
+            }
 
             #title {
                 margin-left: 10% !important;
                 font-size: 0.9em;
             }
 
-
             #layers2 {
                 left: 50%;
-
             }
 
             #serveiSelector2 {
@@ -400,19 +508,20 @@
                 display: none;
             }
 
-            .maplibregl-ctrl-top-right {
-                display: none;
-            }
-
             .notification {
                 top: 2%;
                 left: 5%;
                 right: 5%;
             }
+
+            .maplibregl-ctrl-top-right {
+                top: 10px !important;
+                right: 10px;
+            }
         }
     </style>
 
-  <script type="module" crossorigin src="/assets/index-Dzs1S6jP.js"></script>
+  <script type="module" crossorigin src="/assets/index-D4FAB1UP.js"></script>
 </head>
 
 <body>
@@ -433,14 +542,30 @@
                         <option selected value="topo">Topogràfic</option>
                     </select>
                 </div>
+                <button id="layerConfig" title="Configuració"><span class="material-symbols-outlined">
+                        settings
+                    </span></button>
             </div>
 
         </div>
+
         <div id="infoPanel">
             <span id="closePanel" onclick="closePanel()">&times;</span>
             <div id="loader" class="loader" style="display:none;"></div>
             <div id="infoPanelContent">
-                Clica sobre el mapa per visualitzar informació d'un punt
+                Clica sobre el mapa per visualitzar informació geogràfica
+            </div>
+        </div>
+
+        <!-- Afegir el modal -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 style="margin-bottom: 20px">Configuració del Visor</h2>
+                <h4>Serveis:</h4><br>
+                <div id="configListContainer">
+                    <!-- La llista es posarà aquí -->
+                </div>
             </div>
         </div>
 
@@ -457,11 +582,6 @@
 
                 // Mostra la notificació
                 notification.classList.add("show");
-
-                // Amaga la notificació després de 10 segons
-                setTimeout(function () {
-                    notification.classList.remove("show");
-                }, 10000);
             });
 
             function closeNotification() {

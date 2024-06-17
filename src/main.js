@@ -1,9 +1,11 @@
 
 var map;
 var marker1;
-let service = "all";
+let service = "";
+let allChecked = true;
 let copia;
 let selectedService = null; // Definim selectedService globalment
+let settings;
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
@@ -163,11 +165,32 @@ function removeHighlightedGeometry() {
 
 // Modifica la funció apiConnect per afegir els esdeveniments mouseover i mouseout
 async function apiConnect(lat, lon, service) {
+  loadConfig();
   openPanel();
   showLoader();
+
+  for (let i = 0; i < settings.length; i++) {
+    const { id, checked } = settings[i];
+
+    if (checked === true) {
+      if (service !== '') {
+        service += ',';
+      }
+      service += id;
+    } else {
+      allChecked = false;
+    }
+  }
+  service += ',geocoder,elevacions'
+
+  if (allChecked) {
+    service = 'all';
+  }
+  //console.log('valor service', service)
   const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
   const dades = await response.json();
-  copia = dades[0].features;
+
+  copia = dades.responses.features;
   const contentHtml = document.getElementById("infoPanelContent");
   contentHtml.innerHTML = '';
 
@@ -175,15 +198,15 @@ async function apiConnect(lat, lon, service) {
   let address = null;
   let elevation = null;
 
-  if (dades[0].features.length < 4) {
+  if (dades.numResponses < 2) {
     document.getElementById("infoPanelContent").innerHTML = "No hi ha dades sobre el punt seleccionat.";
   } else {
-    for (let i = 0; i < dades[0].features.length; i++) {
-      serveisDisponibles.push(dades[0].features[i].id)
-      if (dades[0].features[i].id === 'Geocodificador') {
-        address = dades[0].features[i].properties;
-      } else if (dades[0].features[i].id === 'Elevació') {
-        elevation = dades[0].features[i].properties.value;
+    for (let i = 0; i < dades.responses.features.length; i++) {
+      serveisDisponibles.push(dades.responses.features[i].id)
+      if (dades.responses.features[i].id === 'Geocodificador') {
+        address = dades.responses.features[i].properties;
+      } else if (dades.responses.features[i].id === 'Elevació') {
+        elevation = dades.responses.features[i].properties.value;
       }
     }
     if (address) {
@@ -217,9 +240,10 @@ async function apiConnect(lat, lon, service) {
     // Seleccionem el primer servei per defecte només si tenim serveis disponibles
     if (serveisDisponibles.length > 0 && !selectedService) {
       setTimeout(() => {
+        // console.log(serveisDisponibles)
         selectedService = serveisDisponibles[0];
         addGeometry(selectedService, contentHtml.querySelector('.myButtonClass'));
-      }, 0);
+      }, 25);
     } else if (selectedService) {
       // Selecciona tots els elements amb la classe .myButtonClass
       let elements = document.querySelectorAll('.myButtonClass');
@@ -347,6 +371,7 @@ function initMap() {
       },
       trackUserLocation: false
     }), 'top-right');
+    map.addControl(new PitchControl(), 'top-right');
     map.on("click", function (e) {
       var notification = document.getElementById("notification");
       if (notification) {
@@ -399,7 +424,7 @@ export async function geocoderRequest(text) {
     `https://api.icgc.cat/territori/adress/${text}`
   );
   const dades = await response.json();
-  console.log('dades', dades)
+
   if (dades.features) {
     if (!map.getLayer("punts2")) {
       map.addSource("punts2", {
@@ -468,7 +493,6 @@ export async function geocoderRequest(text) {
   }
 }
 
-
 function showLoader() {
   document.getElementById("loader").style.display = "block";
   document.getElementById("infoPanelContent").style.display = "none";
@@ -478,6 +502,107 @@ function hideLoader() {
   document.getElementById("loader").style.display = "none";
   document.getElementById("infoPanelContent").style.display = "block";
 }
+
+// Crear una classe per al control de pitch
+class PitchControl {
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement('button');
+    this._container.className = 'maplibregl-ctrl pitch-control';
+    this._container.textContent = '3D';
+    this._container.onclick = () => {
+      if (this._map.getPitch() === 0) {
+        this._map.easeTo({ pitch: 60 });
+        this._container.textContent = '2D';
+      } else {
+        this._map.easeTo({ pitch: 0 });
+        this._container.textContent = '3D';
+      }
+    };
+    return this._container;
+  }
+
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}
+
+function mapSettings() {
+  var notification = document.getElementById("notification");
+  if (notification) {
+    notification.classList.remove("show");
+  }
+
+  var modal = document.getElementById("myModal");
+  var configListContainer = document.getElementById("configListContainer");
+
+  modal.style.display = "block";
+
+  // Fer el fetch i omplir la llista d'elements
+  fetch('https://api.icgc.cat/territori/info')
+    .then(response => response.json())
+    .then(data => {
+      configListContainer.innerHTML = ''; // Netejar el contingut anterior
+      data.forEach(item => {
+        if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions') {
+          const listItem = document.createElement('div');
+          listItem.className = 'config-item';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = `${item.nomAPI}`;
+          checkbox.name = item.name;
+          checkbox.checked = true; // Marcar el checkbox per defecte
+          const label = document.createElement('label');
+          label.htmlFor = `checkbox-${item.nomAPI}`;
+          label.textContent = item.text;
+          listItem.appendChild(checkbox);
+          listItem.appendChild(label);
+          configListContainer.appendChild(listItem);
+        }
+      });
+      loadConfig(); // Carregar la configuració després de crear els elements
+    })
+    .catch(error => console.error('Error fetching data:', error));
+
+  var span = document.getElementsByClassName("close")[0];
+  span.onclick = function () {
+    saveConfig(); // Guardar la configuració quan es tanqui el modal
+    modal.style.display = "none";
+  }
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      saveConfig(); // Guardar la configuració quan es tanqui el modal
+      modal.style.display = "none";
+    }
+  }
+}
+
+// Funció per guardar la configuració dels checkboxes a localStorage
+function saveConfig() {
+  const checkboxes = document.querySelectorAll('.config-item input[type="checkbox"]');
+  const config = Array.from(checkboxes).map(checkbox => ({
+    id: checkbox.id,
+    checked: checkbox.checked
+  }));
+  localStorage.setItem('layerConfig', JSON.stringify(config));
+}
+
+// Funció per carregar la configuració dels checkboxes des de localStorage
+function loadConfig() {
+  const config = JSON.parse(localStorage.getItem('layerConfig'));
+  if (config) {
+    settings = config;
+    config.forEach(item => {
+      const checkbox = document.getElementById(item.id);
+      if (checkbox) {
+        checkbox.checked = item.checked;
+      }
+    });
+  }
+}
+
 
 export function openPanel() {
   var infoPanel = document.getElementById("infoPanel");
@@ -500,6 +625,10 @@ export function init() {
     const searchText = textInput.value;
     geocoderRequest(searchText);
   });
+  const settings = document.getElementById("layerConfig");
+  settings.addEventListener('click', () => {
+    mapSettings();
+  })
 }
 
 // Executar la funció d'inicialització una vegada que tota la pàgina estigui carregada
