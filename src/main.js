@@ -170,21 +170,21 @@ async function apiConnect(lat, lon, service) {
 
   openPanel();
   showLoader();
+  if (settings) {
+    for (let i = 0; i < settings.length; i++) {
+      const { id, checked } = settings[i];
 
-  for (let i = 0; i < settings.length; i++) {
-    const { id, checked } = settings[i];
-
-    if (checked === true) {
-      if (service !== '') {
-        service += ',';
+      if (checked === true) {
+        if (service !== '') {
+          service += ',';
+        }
+        service += id;
+      } else {
+        allChecked = false;
       }
-      service += id;
-    } else {
-      allChecked = false;
     }
+    service += ',geocoder,elevacions'
   }
-  service += ',geocoder,elevacions'
-
   if (allChecked) {
     service = 'all';
   }
@@ -645,57 +645,6 @@ export function closePanel() {
 }
 export function init() {
   initMap();
-
-  function mapSettings() {
-    var notification = document.getElementById("notification");
-    if (notification) {
-      notification.classList.remove("show");
-    }
-
-    var modal = document.getElementById("myModal");
-    var configListContainer = document.getElementById("configListContainer");
-
-    modal.style.display = "block";
-
-    // Fer el fetch i omplir la llista d'elements
-    fetch('https://api.icgc.cat/territori/info')
-      .then(response => response.json())
-      .then(data => {
-        configListContainer.innerHTML = ''; // Netejar el contingut anterior
-        data.forEach(item => {
-          if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions') {
-            const listItem = document.createElement('div');
-            listItem.className = 'config-item';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `${item.nomAPI}`;
-            checkbox.name = item.name;
-            checkbox.checked = true; // Marcar el checkbox per defecte
-            const label = document.createElement('label');
-            label.htmlFor = `checkbox-${item.nomAPI}`;
-            label.textContent = item.text;
-            listItem.appendChild(checkbox);
-            listItem.appendChild(label);
-            configListContainer.appendChild(listItem);
-          }
-        });
-        loadConfig(); // Carregar la configuració després de crear els elements
-      })
-      .catch(error => console.error('Error fetching data:', error));
-
-    var span = document.getElementsByClassName("close")[0];
-    span.onclick = function () {
-      saveConfig(); // Guardar la configuració quan es tanqui el modal
-      modal.style.display = "none";
-    }
-
-    window.onclick = function (event) {
-      if (event.target == modal) {
-        saveConfig(); // Guardar la configuració quan es tanqui el modal
-        modal.style.display = "none";
-      }
-    }
-  }
 
   const textInput = document.getElementById("textSelector");
   textInput.addEventListener('change', () => {
