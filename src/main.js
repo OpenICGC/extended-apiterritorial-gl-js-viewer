@@ -192,7 +192,7 @@ async function apiConnect(lat, lon, service) {
   const contentHtml = document.getElementById("infoPanelContent");
   const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
   const dades = await response.json();
-  console.log('dades que passa?', dades)
+  //console.log('dades que passa?', dades)
   if (dades.responses) {
     copia = dades.responses.features;
     contentHtml.innerHTML = '';
@@ -339,9 +339,10 @@ function addGeometry(servei, button) {
         button.classList.remove('highlighted-button');
       });
       propertiesDiv.appendChild(closeButton);
-      button.parentNode.insertBefore(propertiesDiv, button.nextSibling);
-      button.parentNode.insertBefore(closeButton, button.nextSibling);
-
+      if (button) {
+        button.parentNode.insertBefore(propertiesDiv, button.nextSibling);
+        button.parentNode.insertBefore(closeButton, button.nextSibling);
+      }
       // Ressaltar el botó clicat
       const allButtons = document.querySelectorAll('.myButtonClass');
       allButtons.forEach(btn => btn.classList.remove('highlighted-button'));
@@ -408,7 +409,9 @@ function initMap() {
       if (selectedService && lat && lon) {
         removeGeometry(); // Elimina la geometria abans de cridar a apiConnect
         apiConnect(lat, lon, service).then(() => {
-          addGeometry(selectedService, document.querySelector(`.myButtonClass.highlighted-button`));
+          if (document.querySelector(`.myButtonClass.highlighted-button`)) {
+            addGeometry(selectedService, document.querySelector(`.myButtonClass.highlighted-button`));
+          }
         });
       } else {
         apiConnect(lat, lon, service);
