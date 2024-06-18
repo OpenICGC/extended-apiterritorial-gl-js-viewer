@@ -112,7 +112,7 @@ function highlightGeometry(servei) {
     map.removeSource('hovered-layer');
   }
 
-  let bbox = new maplibregl.LngLatBounds();
+  //let bbox = new maplibregl.LngLatBounds();
 
   for (let i = 0; i < copia.length; i++) {
     if (servei === copia[i].id) {
@@ -131,25 +131,25 @@ function highlightGeometry(servei) {
         source: 'hovered-layer',
         layout: {},
         paint: {
-          "fill-color": "white",
-          "fill-opacity": 0.4,
+          "fill-color": "orange",
+          "fill-opacity": 0.3,
 
         },
       }, layerSymbol);
 
-      const geometry = copia[i].geometry;
+      // const geometry = copia[i].geometry;
 
-      if (geometry.type === 'Polygon') {
-        geometry.coordinates[0].forEach(coordinatePair => {
-          bbox.extend(coordinatePair);
-        });
-      } else if (geometry.type === 'MultiPolygon') {
-        geometry.coordinates.forEach(polygon => {
-          polygon[0].forEach(coordinatePair => {
-            bbox.extend(coordinatePair);
-          });
-        });
-      }
+      /*  if (geometry.type === 'Polygon') {
+         geometry.coordinates[0].forEach(coordinatePair => {
+           bbox.extend(coordinatePair);
+         });
+       } else if (geometry.type === 'MultiPolygon') {
+         geometry.coordinates.forEach(polygon => {
+           polygon[0].forEach(coordinatePair => {
+             bbox.extend(coordinatePair);
+           });
+         });
+       } */
     }
   }
 }
@@ -187,20 +187,27 @@ async function apiConnect(lat, lon, service) {
     service = 'all';
   }
   //console.log('valor service', service)
+  const contentHtml = document.getElementById("infoPanelContent");
   const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
   const dades = await response.json();
-
-  copia = dades.responses.features;
-  const contentHtml = document.getElementById("infoPanelContent");
-  contentHtml.innerHTML = '';
+  console.log('dades que passa?', dades)
+  if (dades.responses) {
+    copia = dades.responses.features;
+    contentHtml.innerHTML = '';
+  }
 
   let serveisDisponibles = [];
   let address = null;
   let elevation = null;
 
-  if (dades.numResponses < 2) {
-    document.getElementById("infoPanelContent").innerHTML = "No hi ha dades sobre el punt seleccionat.";
-  } else {
+  if (!dades.numResponses || !dades.responses) {
+    contentHtml.innerHTML = "S'ha produït un error en processar la sol·licitud. Si us plau, torna-ho a intentar o selecciona un altre punt.";
+    hideLoader();
+  }
+  else if (dades.numResponses < 2) {
+    contentHtml.innerHTML = "No hi ha dades sobre el punt seleccionat.";
+  }
+  else {
     for (let i = 0; i < dades.responses.features.length; i++) {
       serveisDisponibles.push(dades.responses.features[i].id)
       if (dades.responses.features[i].id === 'Geocodificador') {
@@ -342,8 +349,9 @@ function addGeometry(servei, button) {
 
   const screenWidth = window.innerWidth;
   const padding = screenWidth < 750 ? smallScreenPadding : largeScreenPadding;
-
-  map.fitBounds(bbox, { padding: padding });
+  if (bbox) {
+    map.fitBounds(bbox, { padding: padding });
+  }
 }
 
 function initMap() {
@@ -395,7 +403,7 @@ function initMap() {
       }
       let lon = e.lngLat.lng;
       let lat = e.lngLat.lat;
-      if (selectedService) {
+      if (selectedService && lat && lon) {
         removeGeometry(); // Elimina la geometria abans de cridar a apiConnect
         apiConnect(lat, lon, service).then(() => {
           addGeometry(selectedService, document.querySelector(`.myButtonClass.highlighted-button`));
