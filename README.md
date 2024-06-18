@@ -1,4 +1,4 @@
-![Visor territorial](image.png)
+![API territorial](image.png)
 
 
 ## extended-apiterritorial-gl-js-viewer
