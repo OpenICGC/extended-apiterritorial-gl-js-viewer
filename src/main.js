@@ -303,17 +303,18 @@ function addGeometry(servei, button) {
       }, layerSymbol);
 
       const geometry = copia[i].geometry;
-
-      if (geometry.type === 'Polygon') {
-        geometry.coordinates[0].forEach(coordinatePair => {
-          bbox.extend(coordinatePair);
-        });
-      } else if (geometry.type === 'MultiPolygon') {
-        geometry.coordinates.forEach(polygon => {
-          polygon[0].forEach(coordinatePair => {
+      if (geometry) {
+        if (geometry.type === 'Polygon') {
+          geometry.coordinates[0].forEach(coordinatePair => {
             bbox.extend(coordinatePair);
           });
-        });
+        } else if (geometry.type === 'MultiPolygon') {
+          geometry.coordinates.forEach(polygon => {
+            polygon[0].forEach(coordinatePair => {
+              bbox.extend(coordinatePair);
+            });
+          });
+        }
       }
 
       const previousProperties = document.querySelectorAll('.layer-properties');
