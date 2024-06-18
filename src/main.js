@@ -365,12 +365,28 @@ function initMap() {
 
     var fullscreenControl = new maplibregl.FullscreenControl();
     map.addControl(fullscreenControl, 'top-right');
-    map.addControl(new maplibregl.GeolocateControl({
+    const geolocateControl = new maplibregl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
       },
       trackUserLocation: false
-    }), 'top-right');
+    });
+
+    geolocateControl.on('geolocate', function (e) {
+      const lon = e.coords.longitude;
+      const lat = e.coords.latitude;
+
+      const clickEvent = {
+        lngLat: {
+          lng: lon,
+          lat: lat
+        }
+      };
+
+      map.fire('click', clickEvent);
+    });
+
+    map.addControl(geolocateControl, 'top-right');
     map.addControl(new PitchControl(), 'top-right');
     map.on("click", function (e) {
       var notification = document.getElementById("notification");
