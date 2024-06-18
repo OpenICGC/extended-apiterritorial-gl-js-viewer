@@ -377,16 +377,51 @@ function initMap() {
 
     var fullscreenControl = new maplibregl.FullscreenControl();
     map.addControl(fullscreenControl, 'top-right');
+
+    //test
+    let lastPosition = null;
+    const significantMoveThreshold = 10; // 10 metres de tolerància
+
     const geolocateControl = new maplibregl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
       },
-      trackUserLocation: false
+      trackUserLocation: true
     });
+
+    map.addControl(geolocateControl, 'top-right');
+
+    // Funció per calcular la distància entre dues coordenades
+    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Radi de la Terra en metres
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c; // Distància en metres
+      return distance;
+    }
 
     geolocateControl.on('geolocate', function (e) {
       const lon = e.coords.longitude;
       const lat = e.coords.latitude;
+
+      if (lastPosition) {
+        const distanceMoved = getDistanceFromLatLonInMeters(
+          lastPosition.lat, lastPosition.lon, lat, lon
+        );
+
+        if (distanceMoved < significantMoveThreshold) {
+          // Si el moviment no és significatiu, no fer res
+          return;
+        }
+      }
+
+      // Actualitzar la última posició
+      lastPosition = { lon, lat };
 
       const clickEvent = {
         lngLat: {
@@ -398,7 +433,8 @@ function initMap() {
       map.fire('click', clickEvent);
     });
 
-    map.addControl(geolocateControl, 'top-right');
+
+
     map.addControl(new PitchControl(), 'top-right');
     map.on("click", function (e) {
       var notification = document.getElementById("notification");
