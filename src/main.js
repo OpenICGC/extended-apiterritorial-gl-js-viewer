@@ -40,6 +40,7 @@ export async function onBaseChange() {
   // Esperar a que el nou estil es carregui completament
   map.once('styledata', () => {
     if (clickedLayerData) {
+      const savedColor = localStorage.getItem('clickedLayerColor') || '#f9f91d';
       // Afegeix la font amb les dades guardades
       if (!map.getSource('clicked-layer')) {
         map.addSource('clicked-layer', {
@@ -56,8 +57,8 @@ export async function onBaseChange() {
           source: 'clicked-layer',
           layout: {},
           paint: {
-            "fill-color": "#f9f91d",
-            "fill-outline-color": "#f9f91d",
+            "fill-color": savedColor,
+            "fill-outline-color": savedColor,
             "fill-opacity": 0.5,
           },
         }, layerSymbol);
@@ -112,8 +113,6 @@ function highlightGeometry(servei) {
     map.removeSource('hovered-layer');
   }
 
-  //let bbox = new maplibregl.LngLatBounds();
-
   for (let i = 0; i < copia.length; i++) {
     if (servei === copia[i].id) {
       map.addSource('hovered-layer', {
@@ -136,20 +135,6 @@ function highlightGeometry(servei) {
 
         },
       }, layerSymbol);
-
-      // const geometry = copia[i].geometry;
-
-      /*  if (geometry.type === 'Polygon') {
-         geometry.coordinates[0].forEach(coordinatePair => {
-           bbox.extend(coordinatePair);
-         });
-       } else if (geometry.type === 'MultiPolygon') {
-         geometry.coordinates.forEach(polygon => {
-           polygon[0].forEach(coordinatePair => {
-             bbox.extend(coordinatePair);
-           });
-         });
-       } */
     }
   }
 }
@@ -206,7 +191,7 @@ async function apiConnect(lat, lon, service) {
     contentHtml.innerHTML = "S'ha produït un error en processar la sol·licitud. Si us plau, torna-ho a intentar o selecciona un altre punt.";
     hideLoader();
   }
-  else if (dades.numResponses < 2) {
+  else if (dades.numResponses < 1) {
     contentHtml.innerHTML = "No hi ha dades sobre el punt seleccionat.";
   }
   else {
@@ -281,6 +266,7 @@ function addGeometry(servei, button) {
 
   for (let i = 0; i < copia.length; i++) {
     if (servei === copia[i].id) {
+      const savedColor = localStorage.getItem('clickedLayerColor') || '#f9f91d';
       map.addSource('clicked-layer', {
         type: 'geojson',
         data: {
@@ -296,8 +282,8 @@ function addGeometry(servei, button) {
         source: 'clicked-layer',
         layout: {},
         paint: {
-          "fill-color": "#f9f91d",
-          "fill-outline-color": "#f9f91d",
+          "fill-color": savedColor,
+          "fill-outline-color": savedColor,
           "fill-opacity": 0.5,
         },
       }, layerSymbol);
@@ -375,12 +361,10 @@ function initMap() {
     });
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-    var fullscreenControl = new maplibregl.FullscreenControl();
-    map.addControl(fullscreenControl, 'top-right');
 
     //test
     let lastPosition = null;
-    const significantMoveThreshold = 10; // 10 metres de tolerància
+    const significantMoveThreshold = 20; // 10 metres de tolerància
 
     const geolocateControl = new maplibregl.GeolocateControl({
       positionOptions: {
@@ -453,8 +437,9 @@ function initMap() {
       } else {
         apiConnect(lat, lon, service);
       }
+      const savedMarkerColor = localStorage.getItem('markerColor') || '#ff6e42';
       if (!marker1) {
-        marker1 = new maplibregl.Marker({ color: "#FF6E42" })
+        marker1 = new maplibregl.Marker({ color: savedMarkerColor })
           .setLngLat([lon, lat])
           .addTo(map);
       } else {
@@ -699,6 +684,41 @@ export function init() {
 
 // Executar la funció d'inicialització una vegada que tota la pàgina estigui carregada
 window.addEventListener('DOMContentLoaded', init);
+
+
+//layer color
+document.getElementById('layerColor').addEventListener('input', (event) => {
+  const newColor = event.target.value;
+  localStorage.setItem('clickedLayerColor', newColor);
+  updateClickedLayerColor(newColor);
+});
+
+function updateClickedLayerColor(color) {
+  if (map.getLayer('clicked-layer')) {
+    map.setPaintProperty('clicked-layer', 'fill-color', color);
+    map.setPaintProperty('clicked-layer', 'fill-outline-color', color);
+  }
+}
+
+//marker color
+document.getElementById('markerColor').addEventListener('input', (event) => {
+  const newMarkerColor = event.target.value;
+  localStorage.setItem('markerColor', newMarkerColor);
+  updateMarkerColor(newMarkerColor);
+});
+
+function updateMarkerColor(color) {
+  if (marker1) {
+    marker1.setPopup(null); // Si té un popup, l'hem de treure temporalment
+    const lngLat = marker1.getLngLat(); // Guardem la posició actual del marcador
+    marker1.remove(); // Eliminem el marcador anterior
+
+    marker1 = new maplibregl.Marker({ color: color })
+      .setLngLat(lngLat)
+      .addTo(map);
+  }
+}
+
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

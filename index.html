@@ -134,11 +134,11 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background-color: #333;
+            background-color: #f3f3f3;
         }
 
         ::-webkit-scrollbar-track {
-            background-color: #f3f3f3;
+            background-color: #333;
         }
 
         #infoPanel {
@@ -169,8 +169,8 @@
         }
 
         #closePanel {
-            position: absolute;
-            top: 20px;
+            position: sticky;
+            top: 0px;
             left: 10px;
             font-size: 36px;
             color: white;
@@ -388,6 +388,7 @@
         #configListContainer {
             max-height: 300px;
             overflow-y: auto;
+            margin-bottom: 25px;
         }
 
         .config-item {
@@ -424,6 +425,38 @@
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
+        }
+
+        /* Estil personalitzat per als inputs de color */
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 60px;
+            height: 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-left: 10px;
+            margin-right: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            /* Afegir ombra */
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+            /* Fer que els swatches siguin circulars */
+        }
+
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 6px;
+            /* Fer que els swatches siguin circulars */
         }
 
         @keyframes spin {
@@ -474,6 +507,16 @@
 
             #openPanel {
                 top: 94%;
+            }
+
+            #closePanel {
+                position: sticky;
+                top: 0;
+                left: 0;
+                z-index: 10001;
+                /* Opcional: per assegurar que el botó es vegi clarament */
+                padding: 5px;
+                /* Opcional: per afegir espai al voltant del botó */
             }
 
             #infoPanelContent {
@@ -568,6 +611,10 @@
                 <div id="configListContainer">
                     <!-- La llista es posarà aquí -->
                 </div>
+                <label for="layerColor">Color dels polígons:</label>
+                <input type="color" id="layerColor" name="layerColor" value="#f9f91d">
+                <label for="markerColor">Color del marcador:</label>
+                <input type="color" id="markerColor" name="markerColor" value="#FF6E42">
             </div>
         </div>
 
@@ -595,6 +642,17 @@
             function closeNotification() {
                 var notification = document.getElementById("notification");
                 notification.classList.remove("show");
+            }
+
+            const savedColor = localStorage.getItem('clickedLayerColor');
+            if (savedColor) {
+                document.getElementById('layerColor').value = savedColor;
+            }
+
+            const savedMarkerColor = localStorage.getItem('markerColor');
+            if (savedMarkerColor) {
+                document.getElementById('markerColor').value = savedMarkerColor;
+                updateMarkerColor(savedMarkerColor);
             }
         </script>
 
