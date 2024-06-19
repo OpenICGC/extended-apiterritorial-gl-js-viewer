@@ -535,7 +535,7 @@
 
             #title {
                 margin-left: 10% !important;
-                font-size: 0.9em;
+                font-size: 1em;
             }
 
             #layers2 {
@@ -547,7 +547,7 @@
             }
 
             .base {
-                font-size: 0.9em;
+                display: none;
             }
 
             #textForm {
@@ -563,6 +563,20 @@
             .maplibregl-ctrl-top-right {
                 top: 10px !important;
                 right: 10px;
+            }
+
+            /* Estil personalitzat per als inputs de color */
+            input[type="color"] {
+
+                width: 30px;
+                height: 15px;
+                border: none;
+                cursor: pointer;
+                border-radius: 6px;
+                margin-left: 5px;
+                margin-right: 5px;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+                /* Afegir ombra */
             }
         }
     </style>
