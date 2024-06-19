@@ -203,7 +203,7 @@ async function apiConnect(lat, lon, service) {
       }
     }
     if (address) {
-      contentHtml.innerHTML += `<b>Adreça: </b> ${address.etiqueta} <span style='font-size: 0.75em; color: #8D9596'>(distància: ${address.distancia} km)</span><br>`;
+      contentHtml.innerHTML += `<p style='font-size: 1.2em; margin-bottom: 12px'><b>${address.etiqueta}</b> <span style='font-size: 0.65em; color: #8D9596'>(distància: ${address.distancia} km)</span></p>`;
     }
     if (elevation) {
       contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(4)}, ${lon.toFixed(4)} <br>`
