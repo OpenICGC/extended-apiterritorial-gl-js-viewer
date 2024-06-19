@@ -1,4 +1,3 @@
-
 var map;
 var marker1;
 let service = "";
@@ -204,7 +203,7 @@ async function apiConnect(lat, lon, service) {
       }
     }
     if (address) {
-      contentHtml.innerHTML += `<b>Adreça: </b> ${address.etiqueta} <br>`;
+      contentHtml.innerHTML += `<b>Adreça: </b> ${address.etiqueta} <span style='font-size: 0.75em; color: #8D9596'>(distància: ${address.distancia} km)</span><br>`;
     }
     if (elevation) {
       contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(4)}, ${lon.toFixed(4)} <br>`
