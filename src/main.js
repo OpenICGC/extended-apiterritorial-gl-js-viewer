@@ -595,6 +595,30 @@ function mapSettings() {
     .then(response => response.json())
     .then(data => {
       configListContainer.innerHTML = ''; // Netejar el contingut anterior
+
+      // Afegir el checkbox de selecció/desselecció
+      const selectAllDiv = document.createElement('div');
+      const selectAllCheckbox = document.createElement('input');
+      selectAllCheckbox.type = 'checkbox';
+      selectAllCheckbox.id = 'selectAllCheckbox';
+      const selectAllLabel = document.createElement('label');
+      selectAllDiv.id = 'selectDiv';
+      selectAllLabel.id = 'selectLabel';
+      selectAllLabel.htmlFor = 'selectAllCheckbox';
+      selectAllLabel.textContent = ' Seleccionar tots';
+      selectAllDiv.appendChild(selectAllCheckbox);
+      selectAllDiv.appendChild(selectAllLabel);
+      configListContainer.appendChild(selectAllDiv);
+
+      // Afegir event listener al checkbox de selecció/desselecció
+      selectAllCheckbox.addEventListener('change', function () {
+        const checkboxes = configListContainer.querySelectorAll('input[type="checkbox"]:not(#selectAllCheckbox)');
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+      });
+
+      // Afegir els altres checkboxes
       data.forEach(item => {
         if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions') {
           const listItem = document.createElement('div');
@@ -610,9 +634,15 @@ function mapSettings() {
           listItem.appendChild(checkbox);
           listItem.appendChild(label);
           configListContainer.appendChild(listItem);
+
+          // Afegir event listener per actualitzar l'estat del checkbox de selecció/desselecció
+          checkbox.addEventListener('change', function () {
+            updateSelectAllCheckboxState();
+          });
         }
       });
       loadConfig(); // Carregar la configuració després de crear els elements
+      updateSelectAllCheckboxState(); // Actualitzar l'estat del checkbox de selecció/desselecció
     })
     .catch(error => console.error('Error fetching data:', error));
 
@@ -628,7 +658,16 @@ function mapSettings() {
       modal.style.display = "none";
     }
   }
+
+  // Funció per actualitzar l'estat del checkbox de selecció/desselecció
+  function updateSelectAllCheckboxState() {
+    const checkboxes = configListContainer.querySelectorAll('input[type="checkbox"]:not(#selectAllCheckbox)');
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+    selectAllCheckbox.checked = allChecked;
+  }
 }
+
+
 
 // Funció per guardar la configuració dels checkboxes a localStorage
 function saveConfig() {

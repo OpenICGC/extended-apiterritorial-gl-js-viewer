@@ -427,6 +427,46 @@
             transform: rotate(45deg);
         }
 
+        #selectAllCheckbox {
+
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #a7a7a7;
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            cursor: pointer;
+
+        }
+
+        #selectAllCheckbox:checked {
+            background-color: #a7a7a7;
+        }
+
+        #selectAllCheckbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 0px;
+            left: 4px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+
+        }
+
+        #selectDiv {
+            margin-bottom: 10px;
+        }
+
+        #selectLabel {
+            vertical-align: super;
+        }
+
         /* Estil personalitzat per als inputs de color */
         input[type="color"] {
             -webkit-appearance: none;
@@ -567,7 +607,6 @@
 
             /* Estil personalitzat per als inputs de color */
             input[type="color"] {
-
                 width: 30px;
                 height: 15px;
                 border: none;
@@ -666,7 +705,7 @@
             const savedMarkerColor = localStorage.getItem('markerColor');
             if (savedMarkerColor) {
                 document.getElementById('markerColor').value = savedMarkerColor;
-                updateMarkerColor(savedMarkerColor);
+                //updateMarkerColor(savedMarkerColor);
             }
         </script>
 
