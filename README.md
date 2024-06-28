@@ -3,7 +3,7 @@
 
 ## extended-apiterritorial-gl-js-viewer
 
-  * Maplibre-gl-js viewer including some API Territorial features
+  * Maplibre-gl-js viewer including API Territorial potential features
   * Vanilla JS + Vite
 
 ### API Territorial documentation

@@ -206,7 +206,7 @@ async function apiConnect(lat, lon, service) {
       contentHtml.innerHTML += `<p style='font-size: 1.2em; margin-bottom: 12px'><b>${address.etiqueta}</b> <span style='font-size: 0.65em; color: #8D9596'>(distància: ${address.distancia} km)</span></p>`;
     }
     if (elevation) {
-      contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(4)}, ${lon.toFixed(4)} <br>`
+      contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(5)}, ${lon.toFixed(5)} <br>`
       contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br><br>`
     }
     for (let j = 0; j < serveisDisponibles.length; j++) {
