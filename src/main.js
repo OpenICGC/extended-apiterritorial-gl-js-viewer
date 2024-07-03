@@ -344,6 +344,7 @@ function addGeometry(servei, button) {
 }
 
 function initMap() {
+  showMapLoader(); // Mostra el loader abans d'iniciar el mapa
   map = new maplibregl.Map({
     container: "map",
     style:
@@ -357,6 +358,7 @@ function initMap() {
   map.on('load', function () {
     addSources().then(function () {
       addTerrain();
+
     });
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
@@ -373,6 +375,7 @@ function initMap() {
     });
 
     map.addControl(geolocateControl, 'top-right');
+
 
     // Funció per calcular la distància entre dues coordenades
     function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
@@ -445,6 +448,7 @@ function initMap() {
         marker1.setLngLat([lon, lat]);
       }
     });
+    hideMapLoader(); // Amaga el loader quan el mapa ha acabat de carregar
   });
 }
 
@@ -552,6 +556,15 @@ function hideLoader() {
   document.getElementById("loader").style.display = "none";
   document.getElementById("infoPanelContent").style.display = "block";
 }
+
+function showMapLoader() {
+  document.getElementById('mapLoader').style.display = 'flex';
+}
+
+function hideMapLoader() {
+  document.getElementById('mapLoader').style.display = 'none';
+}
+
 
 // Crear una classe per al control de pitch
 class PitchControl {
