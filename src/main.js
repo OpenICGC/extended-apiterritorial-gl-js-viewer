@@ -36,6 +36,7 @@ export async function onBaseChange() {
   // Canviar l'estil del mapa
   map.setStyle(styleUrl);
 
+
   // Esperar a que el nou estil es carregui completament
   map.once('styledata', () => {
     if (clickedLayerData) {
@@ -63,6 +64,36 @@ export async function onBaseChange() {
         }, layerSymbol);
       }
 
+    }
+    if (base === 'topo') {
+      map.setSky({
+        'sky-color': '#a5f0f0',
+        'sky-horizon-blend': 0.3,
+        'horizon-color': '#e1e3e3',
+        'horizon-fog-blend': 0.9,
+        'fog-ground-blend': 0.85,
+        'fog-color': '#c5d6d6'
+      });
+    }
+    else if (base === 'orto') {
+      map.setSky({
+        'sky-color': '#37709e',
+        'sky-horizon-blend': 0.3,
+        'horizon-color': '#e1e3e3',
+        'horizon-fog-blend': 0.9,
+        'fog-ground-blend': 0.85,
+        'fog-color': '#c5d6d6'
+      });
+    }
+    else if (base === 'fosc') {
+      map.setSky({
+        'sky-color': '#232423',
+        'sky-horizon-blend': 0.3,
+        'horizon-color': '#969996',
+        'horizon-fog-blend': 0.9,
+        'fog-ground-blend': 0.85,
+        'fog-color': '#383838'
+      });
     }
     addSources().then(function () {
       addTerrain();
@@ -354,6 +385,7 @@ function initMap() {
     maxZoom: 18,
     attributionControl: false,
     hash: false,
+    maxPitch: 85,
   });
   map.on('load', function () {
     addSources().then(function () {
@@ -361,7 +393,25 @@ function initMap() {
 
     });
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
-
+    map.setSky({
+      'sky-color': '#a5f0f0',
+      'sky-horizon-blend': 0.3,
+      'horizon-color': '#e1e3e3',
+      'horizon-fog-blend': 0.9,
+      'fog-ground-blend': 0.85,
+      'fog-color': '#c5d6d6'
+      /* "atmosphere-blend": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0,
+        1,
+        10,
+        1,
+        12,
+        0
+      ] */
+    });
 
     //test
     let lastPosition = null;
@@ -780,3 +830,4 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
