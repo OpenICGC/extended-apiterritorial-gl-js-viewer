@@ -65,6 +65,7 @@ export async function onBaseChange() {
       }
 
     }
+    //Topogràfic
     if (base === 'topo') {
       map.setSky({
         'sky-color': '#a5f0f0',
@@ -75,6 +76,7 @@ export async function onBaseChange() {
         'fog-color': '#c5d6d6'
       });
     }
+    //Ortofoto
     else if (base === 'orto') {
       map.setSky({
         'sky-color': '#37709e',
@@ -85,6 +87,7 @@ export async function onBaseChange() {
         'fog-color': '#c5d6d6'
       });
     }
+    //Mapa fosc
     else if (base === 'fosc') {
       map.setSky({
         'sky-color': '#232423',
@@ -400,17 +403,6 @@ function initMap() {
       'horizon-fog-blend': 0.9,
       'fog-ground-blend': 0.85,
       'fog-color': '#c5d6d6'
-      /* "atmosphere-blend": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0,
-        1,
-        10,
-        1,
-        12,
-        0
-      ] */
     });
 
     //test
@@ -615,7 +607,81 @@ function hideMapLoader() {
   document.getElementById('mapLoader').style.display = 'none';
 }
 
+//toponimia
+/* const arrayCapes = [
+  "water-name-ocean",
+  "water-name-mars",
+  "water-name-lakeline-z12",
+  "water-name-lakeline-MM",
+  "highway-name-pedestrian",
+  "highway-name-minor",
+  "highway-name-major",
+  "highway-shield-tertiary",
+  "highway-shield-primary",
+  "highway-shield-motorway_B_10_B-20",
+  "highway-shield-motorway",
+  "highway-shield-motorway_z8",
+  "airport-label-1",
+  "airport-label-2",
+  "poi-orography-altimetria",
+  "poi-level-3_icgc",
+  "place-other-xarxa_viaria",
+  "place-other-4",
+  "place-other-orography",
+  "place-isolated",
+  "highway-minor-square-1",
+  "highway-minor-square-2",
+  "place-other-serveis",
+  "place-other-neighbourhood",
+  "place-village",
+  "place-village_icgc",
+  "place-nommuni",
+  "place-city-z10_icgc",
+  "place-city-z8_icgc",
+  "place-city-z7_icgc",
+  "place-city",
+  "place-city-bcn_icgc",
+  "place-town",
+  "place-continent",
+  "place-country-other",
+  "place-country-adm1_2",
+  "place-country-3",
+  "place-country-2",
+  "place-country-1",
+];
 
+function setVisibility(isVisible) {
+  try {
+    const vis = isVisible ? "visible" : "none";
+    arrayCapes.forEach((capa) => {
+      if (map && map.getLayer(capa)) {
+        map.setLayoutProperty(capa, "visibility", vis);
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+} */
+
+/* var toponimiaCheckbox = document.getElementById('toponimia');
+
+// Afegeix un event listener per capturar canvis a l'estat del checkbox
+toponimiaCheckbox.addEventListener('change', function () {
+  const isChecked = toponimiaCheckbox.checked;
+  // Aquí pots fer el que calgui quan el checkbox canvia d'estat (marcat o no marcat)
+  if (isChecked) {
+    // Codi per activar la toponímia
+    console.log('Toponimia activada');
+    setVisibility(true)
+    // Aquí podríes cridar funcions o fer altres accions segons calgui
+  } else {
+    // Codi per desactivar la toponímia
+    console.log('Toponimia desactivada');
+    setVisibility(false)
+    // Aquí podríes cridar funcions o fer altres accions segons calgui
+  }
+});
+ */
 // Crear una classe per al control de pitch
 class PitchControl {
   onAdd(map) {
@@ -640,6 +706,8 @@ class PitchControl {
     this._map = undefined;
   }
 }
+
+
 
 function mapSettings() {
   var notification = document.getElementById("notification");
