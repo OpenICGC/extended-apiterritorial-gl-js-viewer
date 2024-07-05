@@ -28,7 +28,7 @@ export async function onBaseChange() {
   if (base === 'orto') {
     styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_orto_estandard.json";
   } else if (base === 'topo') {
-    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard.json";
+    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json";
   } else if (base === 'fosc') {
     styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json";
   }
@@ -382,7 +382,7 @@ function initMap() {
   map = new maplibregl.Map({
     container: "map",
     style:
-      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard.json",
+      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json",
     center: [2.0042, 41.7747],
     zoom: 7,
     maxZoom: 18,
@@ -508,7 +508,7 @@ export async function onTextFormSubmit(event) {
 export function getFirstSymbolLayerId(layers) {
   let layer = "background";
   for (var i = 0; i < layers.length; i++) {
-    if (layers[i].type == "symbol" && layers[i]["source-layer"] !== "contour") {
+    if (layers[i].type == "symbol") {
       layer = layers[i].id;
       return layer;
     }
