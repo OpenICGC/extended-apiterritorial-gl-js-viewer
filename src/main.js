@@ -11,7 +11,6 @@ const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
 const largeScreenPadding = { top: 100, bottom: 100, left: 300, right: 50 };
 
 export async function onBaseChange() {
-  const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
   const serveiSelector2 = document.getElementById("serveiSelector2");
   const base = serveiSelector2.value;
 
@@ -20,7 +19,7 @@ export async function onBaseChange() {
   if (map.getLayer('clicked-layer')) {
     const source = map.getSource('clicked-layer');
     if (source && source._data) {
-      clickedLayerData = source._data;
+      clickedLayerData = source._data; // Guardar les dades
     }
   }
 
@@ -36,11 +35,13 @@ export async function onBaseChange() {
   // Canviar l'estil del mapa
   map.setStyle(styleUrl);
 
-
   // Esperar a que el nou estil es carregui completament
   map.once('styledata', () => {
+    const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
+    const savedColor = localStorage.getItem('clickedLayerColor') || '#f9f91d';
+
+    // Reafegir la capa 'clicked-layer' si hi havia dades guardades
     if (clickedLayerData) {
-      const savedColor = localStorage.getItem('clickedLayerColor') || '#f9f91d';
       // Afegeix la font amb les dades guardades
       if (!map.getSource('clicked-layer')) {
         map.addSource('clicked-layer', {
@@ -63,9 +64,9 @@ export async function onBaseChange() {
           },
         }, layerSymbol);
       }
-
     }
-    //Topogràfic
+
+    // Configuració del cel segons el mapa base seleccionat
     if (base === 'topo') {
       map.setSky({
         'sky-color': '#a5f0f0',
@@ -75,9 +76,7 @@ export async function onBaseChange() {
         'fog-ground-blend': 0.85,
         'fog-color': '#c5d6d6'
       });
-    }
-    //Ortofoto
-    else if (base === 'orto') {
+    } else if (base === 'orto') {
       map.setSky({
         'sky-color': '#37709e',
         'sky-horizon-blend': 0.3,
@@ -86,9 +85,7 @@ export async function onBaseChange() {
         'fog-ground-blend': 0.85,
         'fog-color': '#c5d6d6'
       });
-    }
-    //Mapa fosc
-    else if (base === 'fosc') {
+    } else if (base === 'fosc') {
       map.setSky({
         'sky-color': '#232423',
         'sky-horizon-blend': 0.3,
@@ -98,12 +95,65 @@ export async function onBaseChange() {
         'fog-color': '#383838'
       });
     }
+
+    // Afegir fonts i terreny
     addSources().then(function () {
       addTerrain();
     });
   });
 }
 
+
+
+//test
+/* function showMapView() {
+  const tableView = document.getElementById('tableView');
+  const mapView = document.getElementById('mapView');
+
+  tableView.style.display = 'none';
+  mapView.style.display = 'block';
+}
+
+function showTableView() {
+  const tableView = document.getElementById('tableView');
+  const mapView = document.getElementById('mapView');
+
+  tableView.style.display = 'block';
+  mapView.style.display = 'none';
+
+  generateTable();
+}
+
+// Funció per generar la taula amb els noms dels serveis
+function generateTable() {
+  const tableBody = document.getElementById('servicesTable').getElementsByTagName('tbody')[0];
+  tableBody.innerHTML = ''; // Netejar el contingut existent de la taula
+
+  if (copia && copia.length > 0) {
+    copia.forEach(feature => {
+      const servei = feature.id;
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.textContent = servei;
+      row.appendChild(cell);
+      tableBody.appendChild(row);
+    });
+  } else {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.textContent = 'No hi ha dades disponibles.';
+    row.appendChild(cell);
+    tableBody.appendChild(row);
+  }
+}
+
+
+// Vincular les funcions amb els botons un cop la pàgina s'ha carregat
+window.onload = function () {
+  document.getElementById("showMapViewButton").onclick = showMapView;
+  document.getElementById("showTableViewButton").onclick = showTableView;
+};
+ */
 async function addSources() {
   if (!map.getSource("terrainMapZen")) {
     map.addSource("terrainMapZen", {
@@ -286,6 +336,42 @@ async function apiConnect(lat, lon, service) {
   }
   hideLoader();
 }
+
+// Nova funció per actualitzar la taula sense modificar la geometria
+
+/* async function apiConnectForTable(lat, lon, service) {
+  openPanel();
+  showLoader();
+  if (settings) {
+    for (let i = 0; i < settings.length; i++) {
+      const { id, checked } = settings[i];
+
+      if (checked === true) {
+        if (service !== '') {
+          service += ',';
+        }
+        service += id;
+      } else {
+        allChecked = false;
+      }
+    }
+    service += ',geocoder,elevacions'
+  }
+  if (allChecked) {
+    service = 'all';
+  }
+
+  // Crida a l'API per obtenir les dades (ajusta segons el teu cas)
+  const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
+  const dades = await response.json();
+
+  if (dades.responses) {
+    copia = dades.responses.features;
+    generateTable(); // Actualitzar la taula
+  }
+  hideLoader();
+
+} */
 
 function addGeometry(servei, button) {
   const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
@@ -471,6 +557,10 @@ function initMap() {
       }
       let lon = e.lngLat.lng;
       let lat = e.lngLat.lat;
+      /*   if (document.getElementById('tableView').style.display === 'block') {
+          apiConnectForTable(lat, lon, service); // Actualitzar la taula si la vista de taula està activa
+        }
+        else { */
       if (selectedService && lat && lon) {
         removeGeometry(); // Elimina la geometria abans de cridar a apiConnect
         apiConnect(lat, lon, service).then(() => {
@@ -481,6 +571,7 @@ function initMap() {
       } else {
         apiConnect(lat, lon, service);
       }
+      /*  } */
       const savedMarkerColor = localStorage.getItem('markerColor') || '#ff6e42';
       if (!marker1) {
         marker1 = new maplibregl.Marker({ color: savedMarkerColor })
