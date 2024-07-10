@@ -294,7 +294,7 @@ async function apiConnect(lat, lon, service) {
       contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br><br>`
     }
     for (let j = 0; j < serveisDisponibles.length; j++) {
-      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'H3 geospatial indexing system') {
+      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'Malla hexagonal H3') {
         const servei = serveisDisponibles[j];
         const button = document.createElement('button');
         button.textContent = servei;
@@ -386,53 +386,115 @@ function addGeometry(servei, button) {
   for (let i = 0; i < copia.length; i++) {
     if (servei === copia[i].id) {
       const savedColor = localStorage.getItem('clickedLayerColor') || '#f9f91d';
-      map.addSource('clicked-layer', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: copia[i].geometry,
-          properties: {}
-        }
-      });
 
-      map.addLayer({
-        id: 'clicked-layer',
-        type: 'fill',
-        source: 'clicked-layer',
-        layout: {},
-        paint: {
-          "fill-color": savedColor,
-          "fill-outline-color": savedColor,
-          "fill-opacity": 0.5,
-        },
-      }, layerSymbol);
+      const propertiesDiv = document.createElement('div');
+      propertiesDiv.classList.add('layer-properties');
 
-      const geometry = copia[i].geometry;
-      if (geometry) {
-        if (geometry.type === 'Polygon') {
-          geometry.coordinates[0].forEach(coordinatePair => {
-            bbox.extend(coordinatePair);
-          });
-        } else if (geometry.type === 'MultiPolygon') {
-          geometry.coordinates.forEach(polygon => {
-            polygon[0].forEach(coordinatePair => {
-              bbox.extend(coordinatePair);
+      // Afegeix suport per als punts del servei 'Vèrtex xarxa utilitària'
+      if (servei === 'Vèrtex xarxa utilitària') {
+        const geometry = copia[i];
+        const features = geometry.features;
+
+        const sourceData = {
+          type: 'FeatureCollection',
+          features: features
+        };
+
+        map.addSource('clicked-layer', {
+          type: 'geojson',
+          data: sourceData
+        });
+
+        map.addLayer({
+          id: 'clicked-layer',
+          type: 'circle',
+          source: 'clicked-layer',
+          paint: {
+            'circle-radius': 8,
+            'circle-color': savedColor
+          }
+        });
+
+        const propertiesToShow = ['Codi_ICC', 'Municipi', 'distance_km'];
+
+        features.forEach((feature, index) => {
+          const coordinates = feature.geometry.coordinates;
+          if (coordinates && coordinates.length === 2 && typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') { // Assegura't que les coordenades són vàlides
+            bbox.extend(coordinates);
+          }
+
+          const featureProps = feature.properties;
+          if (featureProps) {
+            const featureHeader = document.createElement('div');
+            featureHeader.textContent = `Feature ${index + 1}`;
+            featureHeader.style.fontWeight = 'bold';
+            propertiesDiv.appendChild(featureHeader);
+            propertiesToShow.forEach(key => {
+              if (featureProps[key] !== undefined) {
+                const propertyLine = document.createElement('div');
+
+                propertyLine.textContent = `${key}: ${featureProps[key]}`;
+
+                propertiesDiv.appendChild(propertyLine);
+              }
             });
+            propertiesDiv.appendChild(document.createElement('br'));
+          }
+        });
+      } else {
+        const geometry = copia[i].geometry;
+        if (geometry) {
+          map.addSource('clicked-layer', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              geometry: geometry,
+              properties: {}
+            }
           });
+
+          map.addLayer({
+            id: 'clicked-layer',
+            type: 'fill',
+            source: 'clicked-layer',
+            layout: {},
+            paint: {
+              "fill-color": savedColor,
+              "fill-outline-color": savedColor,
+              "fill-opacity": 0.5,
+            },
+          }, layerSymbol);
+
+          if (geometry.type === 'Polygon') {
+            geometry.coordinates[0].forEach(coordinatePair => {
+              if (coordinatePair && coordinatePair.length === 2 && typeof coordinatePair[0] === 'number' && typeof coordinatePair[1] === 'number') {
+                bbox.extend(coordinatePair);
+              }
+            });
+          } else if (geometry.type === 'MultiPolygon') {
+            geometry.coordinates.forEach(polygon => {
+              polygon[0].forEach(coordinatePair => {
+                if (coordinatePair && coordinatePair.length === 2 && typeof coordinatePair[0] === 'number' && typeof coordinatePair[1] === 'number') {
+                  bbox.extend(coordinatePair);
+                }
+              });
+            });
+          }
+
+          const properties = copia[i].properties;
+          if (properties) {  // Assegura't que les propietats estan definides
+            for (const [key, value] of Object.entries(properties)) {
+              const propertyLine = document.createElement('div');
+              propertyLine.textContent = `${key}: ${value}`;
+              propertiesDiv.appendChild(propertyLine);
+            }
+          }
         }
       }
 
       const previousProperties = document.querySelectorAll('.layer-properties');
       previousProperties.forEach(element => element.remove());
-      const propertiesDiv = document.createElement('div');
-      propertiesDiv.classList.add('layer-properties');
 
-      const properties = copia[i].properties;
-      for (const [key, value] of Object.entries(properties)) {
-        const propertyLine = document.createElement('div');
-        propertyLine.textContent = `${key}: ${value}`;
-        propertiesDiv.appendChild(propertyLine);
-      }
       const closeButton = document.createElement('button');
       closeButton.textContent = '×'; // Caràcter 'x' per representar tancar
       closeButton.classList.add('closeButtonClass');
@@ -458,10 +520,15 @@ function addGeometry(servei, button) {
 
   const screenWidth = window.innerWidth;
   const padding = screenWidth < 750 ? smallScreenPadding : largeScreenPadding;
-  if (bbox) {
+  if (!bbox.isEmpty()) { // Comprova si bbox no està buit abans d'ajustar els límits
     map.fitBounds(bbox, { padding: padding });
   }
 }
+
+
+
+
+
 
 function initMap() {
   showMapLoader(); // Mostra el loader abans d'iniciar el mapa
