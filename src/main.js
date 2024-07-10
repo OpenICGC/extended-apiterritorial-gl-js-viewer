@@ -7,7 +7,7 @@ let selectedService = null; // Definim selectedService globalment
 let settings;
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
-const smallScreenPadding = { top: 5, bottom: window.innerHeight * 0.5 };
+const smallScreenPadding = { top: 60, bottom: (window.innerHeight * 0.5) + 25, left: 60, right: 60 };
 const largeScreenPadding = { top: 100, bottom: 100, left: 300, right: 50 };
 
 export async function onBaseChange() {
@@ -414,8 +414,9 @@ function addGeometry(servei, button) {
             'circle-color': savedColor
           }
         });
+        //afegir label
 
-        const propertiesToShow = ['Codi_ICC', 'Municipi', 'distance_km'];
+        const propertiesToShow = ['Codi_ICC', 'Municipi', 'distance_km', 'Enllaç'];
 
         features.forEach((feature, index) => {
           const coordinates = feature.geometry.coordinates;
@@ -432,9 +433,17 @@ function addGeometry(servei, button) {
             propertiesToShow.forEach(key => {
               if (featureProps[key] !== undefined) {
                 const propertyLine = document.createElement('div');
-
-                propertyLine.textContent = `${key}: ${featureProps[key]}`;
-
+                if (key === 'Enllaç') {
+                  const link = document.createElement('a');
+                  const httpsLink = featureProps[key].replace(/^ftp/, 'https');
+                  link.href = httpsLink;
+                  link.textContent = 'Fitxa ↓';
+                  link.target = '_blank'; // Obre l'enllaç en una nova pestanya
+                  link.classList.add('button-link'); // Afegeix la classe CSS del botó
+                  propertyLine.appendChild(link);
+                } else {
+                  propertyLine.textContent = `${key}: ${featureProps[key]}`;
+                }
                 propertiesDiv.appendChild(propertyLine);
               }
             });
@@ -524,6 +533,7 @@ function addGeometry(servei, button) {
     map.fitBounds(bbox, { padding: padding });
   }
 }
+
 
 
 
