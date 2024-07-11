@@ -182,6 +182,9 @@ function removeGeometry() {
   if (map.getLayer('clicked-layer')) {
     map.removeLayer('clicked-layer');
   }
+  if (map.getLayer('clicked-layer-labels')) {
+    map.removeLayer('clicked-layer-labels');
+  }
   if (map.getSource('clicked-layer')) {
     map.removeSource('clicked-layer');
   }
@@ -337,41 +340,6 @@ async function apiConnect(lat, lon, service) {
   hideLoader();
 }
 
-// Nova funció per actualitzar la taula sense modificar la geometria
-
-/* async function apiConnectForTable(lat, lon, service) {
-  openPanel();
-  showLoader();
-  if (settings) {
-    for (let i = 0; i < settings.length; i++) {
-      const { id, checked } = settings[i];
-
-      if (checked === true) {
-        if (service !== '') {
-          service += ',';
-        }
-        service += id;
-      } else {
-        allChecked = false;
-      }
-    }
-    service += ',geocoder,elevacions'
-  }
-  if (allChecked) {
-    service = 'all';
-  }
-
-  // Crida a l'API per obtenir les dades (ajusta segons el teu cas)
-  const response = await fetch(`https://api.icgc.cat/territori/${service}/geo/${lon}/${lat}`);
-  const dades = await response.json();
-
-  if (dades.responses) {
-    copia = dades.responses.features;
-    generateTable(); // Actualitzar la taula
-  }
-  hideLoader();
-
-} */
 
 function addGeometry(servei, button) {
   const layerSymbol = getFirstSymbolLayerId(map.getStyle().layers);
@@ -414,7 +382,28 @@ function addGeometry(servei, button) {
             'circle-color': savedColor
           }
         });
-        //afegir label
+        // Afegir capa d'etiquetes
+        map.addLayer({
+          id: 'clicked-layer-labels',
+          type: 'symbol',
+          source: 'clicked-layer',
+          layout: {
+            'text-field': ['get', 'Codi_ICC'],
+            'text-font': ['Arial-Bold'],
+            'text-size': 12,
+            'text-offset': [0, 1.5],
+            'text-anchor': 'top'
+          },
+          paint: {
+            'text-color': '#000000'
+          }
+        });
+        // Comprovar si la capa d'etiquetes s'ha afegit correctament
+        if (map.getLayer('clicked-layer-labels')) {
+          console.log("Capa 'clicked-layer-labels' afegida correctament.");
+        } else {
+          console.error("Error afegint la capa 'clicked-layer-labels'.");
+        }
 
         const propertiesToShow = ['Codi_ICC', 'Municipi', 'distance_km', 'Enllaç'];
 
@@ -426,16 +415,12 @@ function addGeometry(servei, button) {
 
           const featureProps = feature.properties;
           if (featureProps) {
-            const featureHeader = document.createElement('div');
-            featureHeader.textContent = `Feature ${index + 1}`;
-            featureHeader.style.fontWeight = 'bold';
-            propertiesDiv.appendChild(featureHeader);
             propertiesToShow.forEach(key => {
               if (featureProps[key] !== undefined) {
                 const propertyLine = document.createElement('div');
                 if (key === 'Enllaç') {
                   const link = document.createElement('a');
-                  const httpsLink = featureProps[key].replace(/^ftp/, 'https');
+                  const httpsLink = featureProps[key]
                   link.href = httpsLink;
                   link.textContent = 'Fitxa ↓';
                   link.target = '_blank'; // Obre l'enllaç en una nova pestanya
@@ -533,12 +518,6 @@ function addGeometry(servei, button) {
     map.fitBounds(bbox, { padding: padding });
   }
 }
-
-
-
-
-
-
 
 function initMap() {
   showMapLoader(); // Mostra el loader abans d'iniciar el mapa
@@ -775,81 +754,6 @@ function hideMapLoader() {
   document.getElementById('mapLoader').style.display = 'none';
 }
 
-//toponimia
-/* const arrayCapes = [
-  "water-name-ocean",
-  "water-name-mars",
-  "water-name-lakeline-z12",
-  "water-name-lakeline-MM",
-  "highway-name-pedestrian",
-  "highway-name-minor",
-  "highway-name-major",
-  "highway-shield-tertiary",
-  "highway-shield-primary",
-  "highway-shield-motorway_B_10_B-20",
-  "highway-shield-motorway",
-  "highway-shield-motorway_z8",
-  "airport-label-1",
-  "airport-label-2",
-  "poi-orography-altimetria",
-  "poi-level-3_icgc",
-  "place-other-xarxa_viaria",
-  "place-other-4",
-  "place-other-orography",
-  "place-isolated",
-  "highway-minor-square-1",
-  "highway-minor-square-2",
-  "place-other-serveis",
-  "place-other-neighbourhood",
-  "place-village",
-  "place-village_icgc",
-  "place-nommuni",
-  "place-city-z10_icgc",
-  "place-city-z8_icgc",
-  "place-city-z7_icgc",
-  "place-city",
-  "place-city-bcn_icgc",
-  "place-town",
-  "place-continent",
-  "place-country-other",
-  "place-country-adm1_2",
-  "place-country-3",
-  "place-country-2",
-  "place-country-1",
-];
-
-function setVisibility(isVisible) {
-  try {
-    const vis = isVisible ? "visible" : "none";
-    arrayCapes.forEach((capa) => {
-      if (map && map.getLayer(capa)) {
-        map.setLayoutProperty(capa, "visibility", vis);
-      }
-    });
-  } catch (err) {
-    console.log(err);
-  }
-} */
-
-/* var toponimiaCheckbox = document.getElementById('toponimia');
-
-// Afegeix un event listener per capturar canvis a l'estat del checkbox
-toponimiaCheckbox.addEventListener('change', function () {
-  const isChecked = toponimiaCheckbox.checked;
-  // Aquí pots fer el que calgui quan el checkbox canvia d'estat (marcat o no marcat)
-  if (isChecked) {
-    // Codi per activar la toponímia
-    console.log('Toponimia activada');
-    setVisibility(true)
-    // Aquí podríes cridar funcions o fer altres accions segons calgui
-  } else {
-    // Codi per desactivar la toponímia
-    console.log('Toponimia desactivada');
-    setVisibility(false)
-    // Aquí podríes cridar funcions o fer altres accions segons calgui
-  }
-});
- */
 // Crear una classe per al control de pitch
 class PitchControl {
   onAdd(map) {
