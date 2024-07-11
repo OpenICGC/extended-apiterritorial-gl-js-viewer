@@ -5,6 +5,7 @@ let allChecked = true;
 let copia;
 let selectedService = null; // Definim selectedService globalment
 let settings;
+let textColor = '#000000'; // Color de text per defecte
 
 // Defineix els valors de padding per a les diferents amplades de pantalla
 const smallScreenPadding = { top: 60, bottom: (window.innerHeight * 0.5) + 25, left: 60, right: 60 };
@@ -16,20 +17,27 @@ export async function onBaseChange() {
 
   // Guardar les dades de la capa 'clicked-layer' si existeix
   let clickedLayerData = null;
+  let clickedLabel = null;
   if (map.getLayer('clicked-layer')) {
     const source = map.getSource('clicked-layer');
     if (source && source._data) {
       clickedLayerData = source._data; // Guardar les dades
+      if (map.getLayer('clicked-layer-labels')) {
+        clickedLabel = source._data;
+      }
     }
   }
 
   let styleUrl;
   if (base === 'orto') {
     styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_orto_estandard.json";
+    textColor = '#FFFFFF'; // Color de text per a ortofoto
   } else if (base === 'topo') {
     styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json";
+    textColor = '#000000';
   } else if (base === 'fosc') {
     styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json";
+    textColor = '#FFFFFF'; // Color de text per a ortofoto
   }
 
   // Canviar l'estil del mapa
@@ -63,6 +71,36 @@ export async function onBaseChange() {
             "fill-opacity": 0.5,
           },
         }, layerSymbol);
+      }
+      if (clickedLabel) {
+        map.removeLayer('clicked-layer');
+        if (!map.getLayer('clicked-layer-labels')) {
+          map.addLayer({
+            id: 'clicked-layer',
+            type: 'circle',
+            source: 'clicked-layer',
+            paint: {
+              'circle-radius': 8,
+              'circle-color': savedColor
+            }
+          });
+          // Afegir capa d'etiquetes
+          map.addLayer({
+            id: 'clicked-layer-labels',
+            type: 'symbol',
+            source: 'clicked-layer',
+            layout: {
+              'text-field': ['get', 'Codi_ICC'],
+              'text-font': ['Arial-Bold'],
+              'text-size': 12,
+              'text-offset': [0, 1.5],
+              'text-anchor': 'top'
+            },
+            paint: {
+              'text-color': textColor
+            }
+          });
+        }
       }
     }
 
@@ -103,57 +141,6 @@ export async function onBaseChange() {
   });
 }
 
-
-
-//test
-/* function showMapView() {
-  const tableView = document.getElementById('tableView');
-  const mapView = document.getElementById('mapView');
-
-  tableView.style.display = 'none';
-  mapView.style.display = 'block';
-}
-
-function showTableView() {
-  const tableView = document.getElementById('tableView');
-  const mapView = document.getElementById('mapView');
-
-  tableView.style.display = 'block';
-  mapView.style.display = 'none';
-
-  generateTable();
-}
-
-// Funció per generar la taula amb els noms dels serveis
-function generateTable() {
-  const tableBody = document.getElementById('servicesTable').getElementsByTagName('tbody')[0];
-  tableBody.innerHTML = ''; // Netejar el contingut existent de la taula
-
-  if (copia && copia.length > 0) {
-    copia.forEach(feature => {
-      const servei = feature.id;
-      const row = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.textContent = servei;
-      row.appendChild(cell);
-      tableBody.appendChild(row);
-    });
-  } else {
-    const row = document.createElement('tr');
-    const cell = document.createElement('td');
-    cell.textContent = 'No hi ha dades disponibles.';
-    row.appendChild(cell);
-    tableBody.appendChild(row);
-  }
-}
-
-
-// Vincular les funcions amb els botons un cop la pàgina s'ha carregat
-window.onload = function () {
-  document.getElementById("showMapViewButton").onclick = showMapView;
-  document.getElementById("showTableViewButton").onclick = showTableView;
-};
- */
 async function addSources() {
   if (!map.getSource("terrainMapZen")) {
     map.addSource("terrainMapZen", {
@@ -395,15 +382,9 @@ function addGeometry(servei, button) {
             'text-anchor': 'top'
           },
           paint: {
-            'text-color': '#000000'
+            'text-color': textColor
           }
         });
-        // Comprovar si la capa d'etiquetes s'ha afegit correctament
-        if (map.getLayer('clicked-layer-labels')) {
-          console.log("Capa 'clicked-layer-labels' afegida correctament.");
-        } else {
-          console.error("Error afegint la capa 'clicked-layer-labels'.");
-        }
 
         const propertiesToShow = ['Codi_ICC', 'Municipi', 'distance_km', 'Enllaç'];
 
