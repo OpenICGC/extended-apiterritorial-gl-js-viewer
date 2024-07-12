@@ -284,7 +284,7 @@ async function apiConnect(lat, lon, service) {
       contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br><br>`
     }
     for (let j = 0; j < serveisDisponibles.length; j++) {
-      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'Malla hexagonal H3') {
+      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'H3 geospatial indexing system') {
         const servei = serveisDisponibles[j];
         const button = document.createElement('button');
         button.textContent = servei;
@@ -803,7 +803,7 @@ function mapSettings() {
 
       // Afegir els altres checkboxes
       data.forEach(item => {
-        if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions') {
+        if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions' && item.nomAPI !== 'h3') {
           const listItem = document.createElement('div');
           listItem.className = 'config-item';
           const checkbox = document.createElement('input');
