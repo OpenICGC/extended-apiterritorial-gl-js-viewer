@@ -259,6 +259,8 @@ async function apiConnect(lat, lon, service) {
   let serveisDisponibles = [];
   let address = null;
   let elevation = null;
+  let temp = null;
+  let ppt = null;
 
   if (!dades.numResponses || !dades.responses) {
     contentHtml.innerHTML = "S'ha produït un error en processar la sol·licitud. Si us plau, torna-ho a intentar o selecciona un altre punt.";
@@ -275,16 +277,25 @@ async function apiConnect(lat, lon, service) {
       } else if (dades.responses.features[i].id === 'Elevació') {
         elevation = dades.responses.features[i].properties.value;
       }
+      else if (dades.responses.features[i].id === 'Temperatura mitjana anual') {
+        console.log('catch temp')
+        temp = dades.responses.features[i].properties.GRAY_INDEX;
+      }
+      else if (dades.responses.features[i].id === 'Precipitació mitjana anual') {
+        ppt = dades.responses.features[i].properties.GRAY_INDEX;
+      }
     }
     if (address) {
       contentHtml.innerHTML += `<p style='font-size: 1.2em; margin-bottom: 12px'><b>${address.etiqueta}</b> <span style='font-size: 0.65em; color: #8D9596'>(distància: ${address.distancia} km)</span></p>`;
     }
-    if (elevation) {
+    if (elevation && temp && ppt) {
       contentHtml.innerHTML += `<b>Coordenades: </b> ${lat.toFixed(5)}, ${lon.toFixed(5)} <br>`
-      contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br><br>`
+      contentHtml.innerHTML += `<b>Elevació: </b> ${elevation} metres<br>`
+      contentHtml.innerHTML += `<b>Temperatura mijana anual: </b> ${temp.toFixed(2)} ºC<br>`
+      contentHtml.innerHTML += `<b>Precipitació mijana anual: </b> ${ppt.toFixed(2)} mm<br><br>`
     }
     for (let j = 0; j < serveisDisponibles.length; j++) {
-      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'H3 geospatial indexing system') {
+      if (serveisDisponibles[j] !== 'Geocodificador' && serveisDisponibles[j] !== 'Elevació' && serveisDisponibles[j] !== 'H3 geospatial indexing system' && serveisDisponibles[j] !== 'Temperatura mitjana anual' && serveisDisponibles[j] !== 'Precipitació mitjana anual') {
         const servei = serveisDisponibles[j];
         const button = document.createElement('button');
         button.textContent = servei;
@@ -803,7 +814,7 @@ function mapSettings() {
 
       // Afegir els altres checkboxes
       data.forEach(item => {
-        if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions' && item.nomAPI !== 'h3') {
+        if (item.nomAPI !== 'geocoder' && item.nomAPI !== 'elevacions' && item.nomAPI !== 'h3' && item.nomAPI !== 'precipitacio' && item.nomAPI !== 'temperatura') {
           const listItem = document.createElement('div');
           listItem.className = 'config-item';
           const checkbox = document.createElement('input');
@@ -849,8 +860,6 @@ function mapSettings() {
     selectAllCheckbox.checked = allChecked;
   }
 }
-
-
 
 // Funció per guardar la configuració dels checkboxes a localStorage
 function saveConfig() {
