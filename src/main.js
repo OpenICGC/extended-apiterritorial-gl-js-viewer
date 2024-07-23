@@ -30,13 +30,13 @@ export async function onBaseChange() {
 
   let styleUrl;
   if (base === 'orto') {
-    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_orto_estandard.json";
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_orto_estandard.json";
     textColor = '#FFFFFF'; // Color de text per a ortofoto
   } else if (base === 'topo') {
-    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json";
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_mapa_base_topografic.json";
     textColor = '#000000';
   } else if (base === 'fosc') {
-    styleUrl = "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_base_fosc.json";
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_mapa_base_fosc.json";
     textColor = '#FFFFFF'; // Color de text per a ortofoto
   }
 
@@ -518,7 +518,7 @@ function initMap() {
   map = new maplibregl.Map({
     container: "map",
     style:
-      "https://geoserveis.icgc.cat/contextmaps/icgc_mapa_estandard_general.json",
+      "https://geoserveis.icgc.cat/styles/icgc_mapa_base_topografic.json",
     center: [2.0042, 41.7747],
     zoom: 7,
     maxZoom: 18,
