@@ -358,8 +358,72 @@ function addGeometry(servei, button) {
       const propertiesDiv = document.createElement('div');
       propertiesDiv.classList.add('layer-properties');
 
+
+      if (servei === 'Refugis climàtics') {
+        const geometry = copia[i];
+        const features = geometry.features;
+
+        const sourceData = {
+          type: 'FeatureCollection',
+          features: features
+        };
+
+        map.addSource('clicked-layer', {
+          type: 'geojson',
+          data: sourceData
+        });
+
+        map.addLayer({
+          id: 'clicked-layer',
+          type: 'circle',
+          source: 'clicked-layer',
+          paint: {
+            'circle-radius': 8,
+            'circle-color': savedColor
+          }
+        });
+        // Afegir capa d'etiquetes
+        map.addLayer({
+          id: 'clicked-layer-labels',
+          type: 'symbol',
+          source: 'clicked-layer',
+          layout: {
+            'text-field': ['get', 'nom'],
+            'text-font': ['Arial-Bold'],
+            'text-size': 12,
+            'text-offset': [0, 1.5],
+            'text-anchor': 'top'
+          },
+          paint: {
+            'text-color': textColor
+          }
+        });
+
+        const propertiesToShow = ['nom', 'municipi', 'distance_km'];
+
+        features.forEach((feature, index) => {
+          const coordinates = feature.geometry.coordinates;
+          if (coordinates && coordinates.length === 2 && typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') { // Assegura't que les coordenades són vàlides
+            bbox.extend(coordinates);
+          }
+
+          const featureProps = feature.properties;
+          if (featureProps) {
+            propertiesToShow.forEach(key => {
+              if (featureProps[key] !== undefined) {
+                const propertyLine = document.createElement('div');
+
+                propertyLine.textContent = `${key}: ${featureProps[key]}`;
+
+                propertiesDiv.appendChild(propertyLine);
+              }
+            });
+            propertiesDiv.appendChild(document.createElement('br'));
+          }
+        });
+      }
       // Afegeix suport per als punts del servei 'Vèrtex xarxa utilitària'
-      if (servei === 'Vèrtex xarxa utilitària') {
+      else if (servei === 'Vèrtex xarxa utilitària') {
         const geometry = copia[i];
         const features = geometry.features;
 
