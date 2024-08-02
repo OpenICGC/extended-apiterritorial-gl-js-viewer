@@ -378,8 +378,10 @@ function addGeometry(servei, button) {
           type: 'circle',
           source: 'clicked-layer',
           paint: {
-            'circle-radius': 8,
-            'circle-color': savedColor
+            'circle-radius': 7,
+            'circle-color': savedColor,
+            'circle-stroke-color': "rgba(17, 16, 16, 1)",
+            'circle-stroke-width': 2
           }
         });
         // Afegir capa d'etiquetes
@@ -442,8 +444,10 @@ function addGeometry(servei, button) {
           type: 'circle',
           source: 'clicked-layer',
           paint: {
-            'circle-radius': 8,
-            'circle-color': savedColor
+            'circle-radius': 7,
+            'circle-color': savedColor,
+            'circle-stroke-color': "rgba(17, 16, 16, 1)",
+            'circle-stroke-width': 2
           }
         });
         // Afegir capa d'etiquetes
