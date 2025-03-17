@@ -362,7 +362,7 @@ async function initMap() {
     );
     map.addExportControl();
     map.addFullscreenControl({}, "top-right");
-    map.addTerrainICGC(data.Terrains.ICGC5M, "bottom-right");
+    // map.addTerrainICGC(data.Terrains.ICGC5M, "bottom-right");
     map.addMouseCoordControl(["bottom-left"]);
     map.on("click", function (e) {
       let lon = e.lngLat.lng;

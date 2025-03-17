@@ -146,7 +146,8 @@ async function addSources() {
     map.addSource("terrainMapZen", {
       type: "raster-dem",
       url: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-      tileSize: 512,
+      encoding: "terrarium",
+      tileSize: 256,
       maxzoom: 14,
     });
   }
@@ -157,6 +158,7 @@ function addTerrain() {
     map.setTerrain({
       source: "terrainMapZen",
       exaggeration: 1.5,
+
     });
   } catch (err) {
     console.log("ERROR addTerrain");
