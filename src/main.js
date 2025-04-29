@@ -727,79 +727,81 @@ export function getFirstSymbolLayerId(layers) {
 }
 
 export async function geocoderRequest(text) {
-  const response = await fetch(
-    `https://api.icgc.cat/territori/adress/${text}`
-  );
-  const dades = await response.json();
+  try {
+    const url = `https://eines.icgc.cat/geocodificador/autocompletar?text=${encodeURIComponent(text)}&layers=topo1,address,topo2,pk`;
+    const response = await fetch(url);
+    const dades = await response.json();
+    const resultsContainer = document.getElementById("autocomp-results");
 
-  if (dades.features) {
-    if (!map.getLayer("punts2")) {
-      map.addSource("punts2", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: dades.features,
-        },
-      });
-      map.addLayer({
-        id: "punts2",
-        type: "circle",
-        source: "punts2",
-        paint: {
-          "circle-color": "red",
-          "circle-opacity": 0.8,
-          "circle-radius": 6
-        },
+    if (!resultsContainer) {
+      console.error("No s'ha trobat el contenidor d'autocompletar.");
+      return;
+    }
+
+    resultsContainer.innerHTML = "";
+
+    if (dades.features && dades.features.length > 0) {
+      dades.features.forEach((feature) => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+
+        // Mostra etiqueta, municipi i comarca
+        item.innerHTML = `<strong>${feature.properties.etiqueta}</strong>, ${feature.properties.municipi} (${feature.properties.comarca})`;
+
+        // Opcional: afegim estil visual de selecció
+        item.addEventListener("mouseover", () => item.style.backgroundColor = "#f0f0f0");
+        item.addEventListener("mouseout", () => item.style.backgroundColor = "white");
+
+        item.addEventListener("click", () => {
+          zoomToFeature(feature);
+          resultsContainer.innerHTML = "";
+          resultsContainer.style.display = "none";
+        });
+
+        resultsContainer.appendChild(item);
       });
     } else {
-      map.removeLayer("punts2").removeSource("punts2");
-      map.addSource("punts2", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: dades.features,
-        },
-      });
-      map.addLayer({
-        id: "punts2",
-        type: "circle",
-        source: "punts2",
-        paint: {
-          "circle-color": "red",
-          "circle-opacity": 0.8,
-          "circle-radius": 6
-        },
-      });
+      const noResult = document.createElement("div");
+      noResult.className = "autocomplete-item";
+      noResult.textContent = "No s'han trobat resultats.";
+      resultsContainer.appendChild(noResult);
     }
-    map.flyTo({
-      center: [dades.features[0].geometry.coordinates[0], dades.features[0].geometry.coordinates[1]],
-      zoom: 11,
-      essential: true
-    });
-  } else {
-    alert(dades);
-  }
-  const popup = new maplibregl.Popup({
-    closeButton: false,
-    closeOnClick: false
-  });
-  if (map.getLayer("punts2")) {
-    map.on("mouseenter", "punts2", function (e) {
-      map.getCanvas().style.cursor = "pointer";
-      popup.setLngLat(e.features[0].geometry.coordinates).setHTML(
-        `Adreça: <b>${e.features[0].properties.etiqueta}</b><br>
-      Carrer: <b>${e.features[0].properties.nom}</b><br>
-      Municipi: <b>${e.features[0].properties.municipi}</b><br>
-      Codi Postal: <b>${e.features[0].properties.codi_postal}</b><br>`
-      ).addTo(map);
-    });
-    map.on("mouseleave", "punts2", function (e) {
-      map.getCanvas().style.cursor = "";
-      popup.remove();
-    });
+  } catch (error) {
+    console.error("Error en la cerca:", error);
+    alert("Hi ha hagut un problema amb la cerca.");
   }
 }
 
+function zoomToFeature(feature) {
+
+  const coordinates = feature.geometry.coordinates;
+  apiConnect(coordinates[1], coordinates[0], service); // Crida a apiConnect amb les coordenades seleccionades
+
+
+  showTemporaryMarker(coordinates);
+}
+
+let temporaryMarker = null;
+
+function showTemporaryMarker(coordinates) {
+  // Eliminar el marcador temporal si ja existeix
+  if (temporaryMarker) {
+    temporaryMarker.remove();
+    temporaryMarker = null;
+  }
+
+  // Crear un nou marcador temporal
+  const markerElement = document.createElement("div");
+  markerElement.className = "marker";
+
+  temporaryMarker = new maplibregl.Marker(markerElement)
+    .setLngLat(coordinates)
+
+    .addTo(map)
+    .togglePopup();
+
+  return temporaryMarker;
+}
 function showLoader() {
   document.getElementById("loader").style.display = "block";
   document.getElementById("infoPanelContent").style.display = "none";
@@ -975,9 +977,28 @@ export function init() {
   initMap();
 
   const textInput = document.getElementById("textSelector");
-  textInput.addEventListener('change', () => {
-    const searchText = textInput.value;
-    geocoderRequest(searchText);
+  const resultsContainer = document.getElementById("autocomp-results");
+
+  // Detectar escritura en temps real
+  textInput.addEventListener("input", (e) => {
+    const text = e.target.value.trim();
+
+    if (text.length >= 3) {
+      geocoderRequest(text); // Crida a l'autocomplete
+      resultsContainer.style.display = "block";
+    } else {
+      resultsContainer.style.display = "none";
+    }
+  });
+
+  // Amaga els suggeriments si es fa clic fora
+  document.addEventListener("click", (e) => {
+    const resultsContainer = document.getElementById("autocomp-results");
+    const input = document.getElementById("textSelector");
+
+    if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+      resultsContainer.style.display = "none";
+    }
   });
   const settings = document.getElementById("layerConfig");
   settings.addEventListener('click', () => {

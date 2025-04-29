@@ -68,7 +68,7 @@
 
         #textSelector {
             height: 20px;
-            width: 180px;
+            width: 380px;
             border-radius: 8px;
             background-color: #1F2020;
             color: white;
@@ -692,6 +692,42 @@
                 left: 38%;
                 top: 39%;
             }
+
+        }
+
+        #autocomp-results {
+            display: none;
+            position: absolute;
+            top: 35px;
+            /* Just sota l'input */
+            left: 0;
+            max-width: 400px;
+            width: 100%;
+            background-color: #ffffff;
+            /* Fons net */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            /* Text fos per contrastar amb fons clar */
+            border-bottom: 1px solid #eee;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        #textForm {
+            position: relative;
         }
     </style>
 
@@ -707,8 +743,9 @@
             <div id="title">API Territorial</div>
             <div id="formContainer">
                 <form id="textForm" onsubmit="onTextFormSubmit(event)">
-                    <input type="text" id="textSelector" placeholder="Cerca una adreça..." />
+                    <input type="text" id="textSelector" placeholder="Cerca una adreça..." autocomplete="off" />
                     <button class="cerca" type="submit">🔍</button>
+                    <div id="autocomp-results"></div>
                 </form>
                 <div id="layers2">
                     <div class="base">Base de referència:</div>
