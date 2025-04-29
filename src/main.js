@@ -746,7 +746,7 @@ export async function geocoderRequest(text) {
         item.className = "autocomplete-item";
 
         // Mostra etiqueta, municipi i comarca
-        item.innerHTML = `<strong>${feature.properties.etiqueta}</strong>, ${feature.properties.municipi} (${feature.properties.comarca})`;
+        item.innerHTML = `<strong>${feature.properties.etiqueta}</strong> (${feature.properties.comarca})`;
 
         // Opcional: afegim estil visual de selecció
         item.addEventListener("mouseover", () => item.style.backgroundColor = "#f0f0f0");
