@@ -40,6 +40,8 @@ export async function onBaseChange() {
     textColor = '#FFFFFF'; // Color de text per a ortofoto
   }
 
+
+
   // Canviar l'estil del mapa
   map.setStyle(styleUrl);
 
@@ -139,6 +141,25 @@ export async function onBaseChange() {
       addTerrain();
     });
   });
+}
+
+function applyBaseStyle(base) {
+  let styleUrl;
+  if (base === 'orto') {
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_orto_estandard.json";
+    textColor = '#FFFFFF';
+  } else if (base === 'topo') {
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_mapa_base_topografic.json";
+    textColor = '#000000';
+  } else if (base === 'fosc') {
+    styleUrl = "https://geoserveis.icgc.cat/styles/icgc_mapa_base_fosc.json";
+    textColor = '#FFFFFF';
+  }
+
+  map.setStyle(styleUrl);
+
+  // Opcional: aplica el color de text si cal
+  document.documentElement.style.setProperty('--text-color', textColor);
 }
 
 async function addSources() {
@@ -601,6 +622,7 @@ function initMap() {
       addTerrain();
 
     });
+
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
     map.setSky({
       'sky-color': '#a5f0f0',
@@ -692,6 +714,11 @@ function initMap() {
         apiConnect(lat, lon, service);
       }
       /*  } */
+      // Eliminar el marcador temporal si existeix
+      if (temporaryMarker) {
+        temporaryMarker.remove();
+        temporaryMarker = null;
+      }
       const savedMarkerColor = localStorage.getItem('markerColor') || '#ff6e42';
       if (!marker1) {
         marker1 = new maplibregl.Marker({ color: savedMarkerColor })
@@ -723,6 +750,19 @@ export function getFirstSymbolLayerId(layers) {
       layer = layers[i].id;
       return layer;
     }
+  }
+}
+
+export async function paramsRequest(text) {
+  try {
+    const url = `https://eines.icgc.cat/geocodificador/autocompletar?text=${encodeURIComponent(text)}&layers=topo1,address,topo2,pk`;
+    const response = await fetch(url);
+    const dades = await response.json();
+    console.log('dades', dades)
+    //Aqui despleguem panell o modal amb els resultats principals de la cerca
+    //L'usuari clicarà sobre el resultat/punt que vulgui i es mostrarà un llistat amb els serveis i dades que desitjats.
+  } catch (error) {
+    console.error("Error en la cerca:", error);
   }
 }
 
@@ -768,11 +808,17 @@ export async function geocoderRequest(text) {
     }
   } catch (error) {
     console.error("Error en la cerca:", error);
-    alert("Hi ha hagut un problema amb la cerca.");
+
   }
 }
 
 function zoomToFeature(feature) {
+
+  // Elimina marker1 si existeix
+  if (marker1) {
+    marker1.remove();
+    marker1 = null;
+  }
 
   const coordinates = feature.geometry.coordinates;
   apiConnect(coordinates[1], coordinates[0], service); // Crida a apiConnect amb les coordenades seleccionades
@@ -959,6 +1005,14 @@ function loadConfig() {
   }
 }
 
+// Funció per obtenir els paràmetres de la URL
+function getUrlParams() {
+  const search = window.location.search || window.location.hash.split('?')[1] || '';
+  return new URLSearchParams(search);
+}
+
+
+
 
 export function openPanel() {
   var infoPanel = document.getElementById("infoPanel");
@@ -974,7 +1028,18 @@ export function closePanel() {
   document.getElementById("openPanel").style.display = "block"; // Mostrar el botó d'obrir quan el panell està tancat
 }
 export function init() {
+
   initMap();
+
+  // Llegir el paràmetre 'q' i mostrar-lo a consola
+  const params = getUrlParams();
+  const qParam = params.get('q');
+
+  if (qParam) {
+    console.log("Paràmetre 'q' rebut:", qParam);
+    paramsRequest(qParam);
+  }
+
 
   const textInput = document.getElementById("textSelector");
   const resultsContainer = document.getElementById("autocomp-results");
@@ -1006,9 +1071,48 @@ export function init() {
   })
 }
 
+function showInitialNotification() {
+  // Comprova si ja s'ha mostrat abans
+  if (!localStorage.getItem("notificationShown")) {
+    const notification = document.getElementById("notification");
+
+    if (notification) {
+      notification.style.display = "block"; // Força el display si cal
+      notification.classList.add("show");   // Si uses classes per mostrar/ocultar
+
+      // Opcional: Amaga-la automàticament després de 7 segons
+      setTimeout(() => {
+        notification.classList.remove("show");
+        notification.style.display = "none";
+      }, 7000);
+
+      // Marca que ja s'ha mostrat
+      localStorage.setItem("notificationShown", "true");
+    }
+  } else {
+    // Si ja s'ha mostrat, assegura't que segueixi oculta
+    const notification = document.getElementById("notification");
+    if (notification) {
+      notification.classList.remove("show");
+      notification.style.display = "none";
+    }
+  }
+}
+
 // Executar la funció d'inicialització una vegada que tota la pàgina estigui carregada
 window.addEventListener('DOMContentLoaded', init);
-
+window.addEventListener('DOMContentLoaded', () => {
+  showInitialNotification();
+  const savedBase = localStorage.getItem("selectedBase");
+  if (savedBase) {
+    document.getElementById("serveiSelector2").value = savedBase;
+    applyBaseStyle(savedBase);
+  } else {
+    // Si no hi ha valor guardat, pots posar-ne un per defecte
+    document.getElementById("serveiSelector2").value = 'topo';
+    applyBaseStyle('topo');
+  }
+});
 
 //layer color
 document.getElementById('layerColor').addEventListener('input', (event) => {
@@ -1030,6 +1134,31 @@ document.getElementById('markerColor').addEventListener('input', (event) => {
   localStorage.setItem('markerColor', newMarkerColor);
   updateMarkerColor(newMarkerColor);
 });
+
+document.getElementById("serveiSelector2").addEventListener("change", function () {
+  const base = this.value;
+
+  // Guardem la base seleccionada a localStorage
+  localStorage.setItem("selectedBase", base);
+
+  // Canviem l'estil del mapa segons la base
+  applyBaseStyle(base);
+});
+
+// Sincronitza el cercador mòbil amb la funció de cerca
+document.getElementById("mobileSearchForm")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const textInput = document.getElementById("mobileTextSelector");
+  const text = textInput.value.trim();
+
+  if (text.length >= 3) {
+    geocoderRequest(text); // Suposant que aquesta funció ja existeix
+    document.getElementById("autocomp-results").style.display = "block";
+  } else {
+    document.getElementById("autocomp-results").style.display = "none";
+  }
+});
+
 
 function updateMarkerColor(color) {
   if (marker1) {
@@ -1053,4 +1182,3 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
-

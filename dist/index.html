@@ -729,14 +729,76 @@
         #textForm {
             position: relative;
         }
+
+        /* Estil per a dispositius mòbils */
+        @media only screen and (max-width: 768px) {
+            #mobileSearchContainer {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 999;
+                background-color: white;
+                padding: 8px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                width: 90%;
+                max-width: 400px;
+            }
+
+            #mobileSearchContainer input[type="text"] {
+                width: 80%;
+                padding: 8px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            #mobileSearchContainer button.cerca {
+                padding: 8px 10px;
+                margin-left: 5px;
+                border: none;
+                background-color: #007bff;
+                color: white;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            #mobileSearchContainer button.cerca:hover {
+                background-color: #0056b3;
+            }
+
+            #autocomp-results {
+                top: 60px;
+                /* Just sota el cercador */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 400px;
+            }
+
+            #mobileSearchContainer {
+                top: 15px;
+                width: 90%;
+                max-width: 400px;
+            }
+        }
     </style>
 
-  <script type="module" crossorigin src="/assets/index-BCAqdi09.js"></script>
+  <script type="module" crossorigin src="/assets/index-Cr4dWGdd.js"></script>
 </head>
 
 <body>
     <div id="mapLoader" class="loadercontainer">
         <div class="loader2"></div> <!-- Nou loader per al mapa -->
+    </div>
+    <!-- Cercador per a dispositius mòbils -->
+    <div id="mobileSearchContainer">
+        <form id="mobileSearchForm">
+            <input type="text" id="mobileTextSelector" placeholder="Cerca una adreça..." autocomplete="off" />
+            <button class="cerca" type="submit">🔍</button>
+        </form>
     </div>
     <div id="map">
 
@@ -784,7 +846,7 @@
             <div id="loader" class="loader" style="display:none;"></div>
             <!-- <div id="mapView"> -->
             <div id="infoPanelContent">
-                Clica sobre el mapa per visualitzar informació geogràfica
+                Clica sobre el mapa o realitza una cerca per visualitzar informació geogràfica
             </div>
             <!-- </div> -->
         </div>
